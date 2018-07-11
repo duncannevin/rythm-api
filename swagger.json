@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "1.0.0",
+    "version": "0.1.0",
     "title": "rythm_api",
     "description": "RESTful api for rythm app"
   },
@@ -15,6 +15,10 @@
     {
       "name": "Users",
       "description": "API for users in the system"
+    },
+    {
+      "name": "Todo",
+      "description": "API for handling todo lists in the system"
     }
   ],
   "securityDefinitions": {
@@ -35,6 +39,180 @@
     "application/json"
   ],
   "paths": {
+    "/todo": {
+      "post": {
+        "tags": [
+          "Todo"
+        ],
+        "summary": "Submit new todo list",
+        "description": "Submit new todo list",
+        "parameters": [
+          {
+            "name": "todo",
+            "in": "body",
+            "description": "Todo list user is adding",
+            "schema": {
+              "$ref": "#/definitions/Todo"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "New todo",
+            "schema": {
+              "$ref": "#/definitions/Todo"
+            }
+          },
+          "401": {
+            "description": "UnAuthorized",
+            "schema": {
+              "$ref": "#/definitions/UnAuthorized"
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Todo"
+        ],
+        "summary": "Update current todo",
+        "description": "Todo must be owned by JWT holder",
+        "parameters": [
+          {
+            "name": "todo",
+            "in": "body",
+            "description": "Todo list user is updating",
+            "schema": {
+              "$ref": "#/definitions/Todo"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated todo",
+            "schema": {
+              "$ref": "#/definitions/Todo"
+            }
+          },
+          "401": {
+            "description": "UnAuthorized",
+            "schema": {
+              "$ref": "#/definitions/UnAuthorized"
+            }
+          }
+        }
+      }
+    },
+    "/todo/{TODO_ID}": {
+      "delete": {
+        "tags": [
+          "Todo"
+        ],
+        "summary": "Delete a todo",
+        "description": "TODO_ID must be owned by JWT holder",
+        "parameters": [
+          {
+            "name": "TODO_ID",
+            "in": "path",
+            "description": "Delete by todo_id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Todo_id and message",
+            "schema": {
+              "$ref": "#/definitions/UpdatedSuccessfully"
+            }
+          },
+          "401": {
+            "description": "UnAuthorized",
+            "schema": {
+              "$ref": "#/definitions/UnAuthorized"
+            }
+          }
+        }
+      }
+    },
+    "/todo?category={CATEGORY}&todo_id={TODO_ID}&search={STRING}&user_id={USER_ID}&username={USERNAME}": {
+      "get": {
+        "tags": [
+          "Todo"
+        ],
+        "summary": "Get a list of todos",
+        "description": "If JWT does not match user_id no private todos will be returned.",
+        "parameters": [
+          {
+            "name": "CATEGORY",
+            "in": "query",
+            "description": "Query based on category",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "TODO_ID",
+            "in": "query",
+            "description": "Query based on todo_id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SEARCH",
+            "in": "query",
+            "description": "Query titles and descriptions based on string",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "USER_ID",
+            "in": "query",
+            "description": "Query based on user_id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "USERNAME",
+            "in": "query",
+            "description": "Query based on username",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of todos",
+            "schema": {
+              "$ref": "#/definitions/ListTodos"
+            }
+          },
+          "401": {
+            "description": "UnAuthorized",
+            "schema": {
+              "$ref": "#/definitions/UnAuthorized"
+            }
+          }
+        }
+      }
+    },
     "/auth/register": {
       "post": {
         "tags": [
@@ -181,6 +359,75 @@
     }
   },
   "definitions": {
+    "Todo": {
+      "required": [
+        "user_id",
+        "username",
+        "private",
+        "title",
+        "description",
+        "category",
+        "list"
+      ],
+      "properties": {
+        "user_id": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "todo_id": {
+          "type": "string"
+        },
+        "master": {
+          "type": "boolean"
+        },
+        "master_ref": {
+          "type": "string"
+        },
+        "private": {
+          "type": "boolean"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "list": {
+          "type": "array",
+          "$ref": "#/definitions/TodoItem"
+        }
+      }
+    },
+    "TodoItem": {
+      "required": [
+        "title",
+        "description"
+      ],
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "ListTodos": {
+      "required": [
+        "list"
+      ],
+      "properties": {
+        "list": {
+          "type": "array",
+          "$ref": "#/definitions/Todo"
+        }
+      }
+    },
     "User": {
       "required": [
         "email",
@@ -191,6 +438,10 @@
         "username"
       ],
       "properties": {
+        "username": {
+          "type": "string",
+          "uniqueItems": true
+        },
         "email": {
           "type": "string",
           "uniqueItems": true
@@ -206,15 +457,26 @@
         },
         "role": {
           "type": "string"
-        },
-        "username": {
-          "type": "string"
         }
       }
     },
     "Users": {
       "type": "array",
       "$ref": "#/definitions/User"
+    },
+    "UpdatedSuccessfully": {
+      "required": [
+        "token_id",
+        "message"
+      ],
+      "properties": {
+        "token_id": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
     },
     "UnAuthorized": {
       "properties": {

@@ -1,4 +1,3 @@
-.idea
 lib-cov
 *.seed
 *.log
@@ -34,3 +33,6 @@ Thumbs.db
 
 # Ignore built ts files
 dist/**/*
+
+src/typings.d.t
+coverage
