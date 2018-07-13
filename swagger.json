@@ -336,7 +336,7 @@
         }
       }
     },
-    "/users": {
+    "users?user_id={USER_ID}&username={USERNAME}": {
       "get": {
         "tags": [
           "Users"
@@ -346,12 +346,38 @@
             "Bearer": []
           }
         ],
-        "summary": "Get users",
+        "parameters": [
+          {
+            "name": "USER_ID",
+            "in": "query",
+            "summary": "Query user based on user id",
+            "description": "User id must match what is found in JWT",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "USERNAME",
+            "in": "query",
+            "summary": "Query user based on username",
+            "description": "Username must match what is found in JWT",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "description": "Get a user by user_id or username. If neither is found will return all users if JWT indicates correct role.",
         "responses": {
           "200": {
-            "description": "List of users",
+            "description": "User profile",
             "schema": {
-              "$ref": "#/definitions/Users"
+              "$ref": "#/definitions/User"
+            }
+          },
+          "401": {
+            "description": "UnAuthorized",
+            "schema": {
+              "$ref": "#/definitions/UnAuthorized"
             }
           }
         }
@@ -382,7 +408,7 @@
         "master": {
           "type": "boolean"
         },
-        "master_ref": {
+        "master_id": {
           "type": "string"
         },
         "private": {
@@ -409,10 +435,16 @@
         "description"
       ],
       "properties": {
-        "title": {
+        "item_name": {
           "type": "string"
         },
-        "description": {
+        "instructions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
           "type": "string"
         }
       }
