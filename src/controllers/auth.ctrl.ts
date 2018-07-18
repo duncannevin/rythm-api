@@ -105,7 +105,7 @@ class AuthController {
       };
       await transporter.sendMail(mailOptions);
       const savedUser: User = await UserService.save(user);
-      res.status(200).send(savedUser);
+      res.status(201).send(savedUser);
     } catch (error) {
       console.log(error);
       res.status(400).send({

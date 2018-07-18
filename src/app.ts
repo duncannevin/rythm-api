@@ -12,7 +12,7 @@ import * as bluebird from 'bluebird';
 import * as expressJwt from 'express-jwt';
 import * as swaggerUI from 'swagger-ui-express';
 import * as swaggerDocument from '../swagger.json';
-import { AuthRouter, SwaggerAPIRouter, UserRouter } from './routes';
+import { AuthRouter, TodoRouter, UserRouter, SwaggerAPIRouter } from './routes';
 
 const MongoStore = mongo(session);
 
@@ -78,6 +78,7 @@ app.use(function (err, req, res, next) {
 // express routes
 app.use('/auth', AuthRouter);
 app.use('/users', UserRouter);
+app.use('/todo', TodoRouter);
 
 /**
  * Add swagger endpoints

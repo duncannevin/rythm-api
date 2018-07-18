@@ -56,6 +56,10 @@ class UserService {
     return await UserRepository.find() as User[];
   }
 
+  async deleteOne(username: String): Promise<void> {
+    return await UserRepository.deleteOne({username: username});
+  }
+
   /**
    * @description Compares encrypted and decrypted passwords
    * @param {string} candidatePassword
