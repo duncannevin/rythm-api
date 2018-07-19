@@ -5,15 +5,12 @@ import * as crypto from 'crypto';
 import * as nodemailer from 'nodemailer';
 import { User } from '../models/user';
 import { default as UserService } from '../services/user.srvc';
+import { validateLogin, validateRegister } from '../validators';
 
 class AuthController {
 
   async login(req: Request, resp: Response) {
-    req.assert('email', 'Email is not valid').isEmail();
-    req.assert('password', 'Password cannot be blank').notEmpty();
-    req.sanitize('email').normalizeEmail({gmail_remove_dots: false});
-
-    const errors = req.validationErrors();
+    const errors = validateLogin(req);
 
     if (errors) {
       return resp.status(401).send({
@@ -52,16 +49,7 @@ class AuthController {
   }
 
   async register(req: Request, res: Response, next: NextFunction) {
-    req.assert('password', 'Password cannot be blank').notEmpty();
-    req.assert('fname', 'First name must be specified').notEmpty();
-    req.assert('lname', 'Last name must be specified').notEmpty();
-    req.assert('username', 'Username must be specified').notEmpty();
-    req.assert('role', 'Role must be specified').notEmpty();
-
-    req.assert('email', 'Email is not valid').isEmail();
-    req.sanitize('email').normalizeEmail({gmail_remove_dots: false});
-
-    const errors = req.validationErrors();
+    const errors = validateRegister(req);
 
     if (errors) {
       return res.status(401).send({

@@ -1,29 +1,9 @@
 import * as mongoose from 'mongoose';
-import { AuthToken } from '../models/auth-token';
-import { Profile } from '../models/profile';
 import * as bcrypt from 'bcrypt-nodejs';
 import * as util from 'util';
 import { User } from '../models/user';
 
-export type UserType = mongoose.Document & {
-
-  email: string,
-  username: string,
-  password: string,
-  role: string,
-
-  active: boolean,
-
-  passwordResetToken: string,
-  passwordResetExpires: Date,
-
-  activationToken: string,
-  activationExpires: Date,
-
-  tokens: Array<AuthToken>,
-
-  profile: Profile,
-
+export type UserType = mongoose.Document & User & {
   comparePassword: (candidatePassword: string, cb: (err: any, isMatch: any) => {}) => void
 };
 
