@@ -25,6 +25,23 @@ class TodoService {
   /**
    * @description updates a Todo in storage
    */
+  async updateOne(todo: Todo): Promise<Todo> {
+    return (await TodoRepository.findOneAndUpdate({todo_id: todo.todo_id}, todo));
+  }
+
+  /**
+   * @description deletes a single Todo from storage
+   */
+  async deleteOne(todoId: String): Promise<void> {
+    return (await TodoRepository.deleteOne({todo_id: todoId}));
+  }
+
+  /**
+   * @description deletes all of a users Todos
+   */
+  async deleteUsersTodos(username: String): Promise<void> {
+    return (await TodoRepository.deleteMany({username: username}));
+  }
 }
 
 export default new TodoService();

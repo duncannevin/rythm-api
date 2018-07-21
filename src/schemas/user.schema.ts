@@ -2,6 +2,7 @@ import * as mongoose from 'mongoose';
 import * as bcrypt from 'bcrypt-nodejs';
 import * as util from 'util';
 import { User } from '../models/user';
+import * as uniqId from 'uniqid';
 
 export type UserType = mongoose.Document & User & {
   comparePassword: (candidatePassword: string, cb: (err: any, isMatch: any) => {}) => void
@@ -10,6 +11,7 @@ export type UserType = mongoose.Document & User & {
 const UserSchema = new mongoose.Schema({
   email: {type: String, unique: true},
   username: {type: String, unique: true},
+  user_id: {type: String, unique: true},
   password: String,
   role: String,
 
@@ -48,6 +50,14 @@ UserSchema.pre('save', function save(next) {
       next();
     });
   });
+});
+
+UserSchema.pre('save', function(next) {
+  const user = this;
+  if (!user.hasOwnProperty('user_id')) {
+    user.user_id = uniqId('rythm-');
+  }
+  next();
 });
 
 UserSchema.methods.comparePassword = function (candidatePassword: string) {

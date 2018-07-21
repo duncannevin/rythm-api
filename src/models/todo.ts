@@ -6,7 +6,7 @@ export interface Todo {
   todo_id?: string;
   master?: boolean;
   master_id?: string;
-  private: string;
+  private: boolean;
   title: string;
   description: string;
   category: string;

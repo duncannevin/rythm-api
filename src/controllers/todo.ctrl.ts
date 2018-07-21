@@ -14,7 +14,8 @@ class TodoController {
     }
 
     try {
-      const todo = TodoService.save(req.body);
+      const todo = await TodoService.save(req.body);
+
       if (!todo) {
         return resp.status(404).send({
           msg: 'Failed to insert user',

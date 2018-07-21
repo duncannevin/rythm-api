@@ -1,5 +1,6 @@
 import * as mongoose from 'mongoose';
 import { Todo } from '../models/todo';
+import * as uniqId from 'uniqid';
 
 export type TodoType = mongoose.Document & Todo;
 
@@ -13,7 +14,7 @@ const TodoSchema = new mongoose.Schema({
     required: true
   },
   todo_id: String,
-  master: String,
+  master: Boolean,
   master_id: String,
   private: {
     type: Boolean,
@@ -49,6 +50,17 @@ const TodoSchema = new mongoose.Schema({
     required: true
   },
 }, {timestamps: true});
+
+TodoSchema.pre('save', function save (next) {
+  const todo: Todo = this;
+  if (!todo.hasOwnProperty('todo_id')) {
+    const todoId = uniqId('todo-');
+    todo.todo_id = todoId;
+    todo.master_id = todoId;
+    todo.master = true;
+  }
+  next();
+});
 
 type TodoType = Todo & mongoose.Document;
 const TodoRepository = mongoose.model<TodoType>('Todo', TodoSchema);
