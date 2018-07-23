@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import { default as TodoService } from '../services/todo.srvc';
 import { validateTodo } from '../validators';
+import { Todo } from '../models/todo';
+import * as omit from 'object.omit';
+import { street1 } from 'aws-sdk/clients/importexport';
 
 class TodoController {
   async insertTodo (req: Request, resp: Response) {
@@ -32,23 +35,19 @@ class TodoController {
     }
   }
 
+  async _filterTodos (todos: Todo[], query: string) {
+    if (query) {
+      return await todos.filter((todo) => (todo.title + todo.description).includes(query));
+    } else {
+      return await todos;
+    }
+  }
+
   async getTodos (req: Request, resp: Response) {
     try {
-      switch (req.query) {
-        case 'category':
-          break;
-        case 'id':
-          break;
-        case 'search':
-          break;
-        case 'user_id':
-          break;
-        case 'username':
-          break;
-        default: // todo only allow if role is admin
-          const todos = await TodoService.fetchAll();
-          return resp.status(200).send(todos);
-      }
+      const query = req.query;
+      const todos = await TodoService.queryRepository(omit(JSON.parse(JSON.stringify(query)), 'search'));
+      return resp.status(200).send(todos);
     } catch (error) {
       return resp.status(400).send({
         msg: error,

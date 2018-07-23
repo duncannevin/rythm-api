@@ -23,6 +23,15 @@ class TodoService {
   }
 
   /**
+   * @description queries Todos
+   * @param {object} query
+   * @return {Promise<Todo[]>}
+   */
+  async queryRepository(query: object): Promise<Todo[]> {
+    return await TodoRepository.find(query) as Todo[];
+  }
+
+  /**
    * @description updates a Todo in storage
    */
   async updateOne(todo: Todo): Promise<Todo> {

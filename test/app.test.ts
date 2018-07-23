@@ -171,6 +171,79 @@ describe('/todo', () => {
       request(app).get(route)
         .expect(401, done);
     });
+
+    it('should return 200', (done) => {
+      request(app).get(route)
+        .set('Authorization', `Bearer ${JWT}`)
+        .expect(200, done);
+    });
+
+    it('should return a todo by todo_id', (done) => {
+      request(app).get(`${route}?todo_id=${todo.todo_id}`)
+        .set('Authorization', `Bearer ${JWT}`)
+        .then((res) => {
+          const resTodo = res.body;
+          expect(Array.isArray(resTodo)).toBe(true);
+          expect(resTodo.length).toEqual(1);
+          expect(resTodo[0].todo_id).toEqual(todo.todo_id);
+          expect(res.status).toEqual(200);
+          done();
+        });
+    });
+
+    it('should return a list of todos by category', (done) => {
+      request(app).get(`${route}?category=${todo.category}`)
+        .set('Authorization', `Bearer ${JWT}`)
+        .then((res) => {
+          expect(res.status).toEqual(200);
+          expect(res.body[0].category).toEqual(todo.category);
+          done();
+        });
+    });
+
+    it ('should return a list of todos by user_id', (done) => {
+      request(app).get(`${route}?user_id=${todo.user_id}`)
+        .set('Authorization', `Bearer ${JWT}`)
+        .then((res) => {
+          expect(res.status).toEqual(200);
+          expect(res.body[0].user_id).toEqual(todo.user_id);
+          done();
+        });
+    });
+
+    it ('should return a list of todos by username', (done) => {
+      request(app).get(`${route}?username=${todo.username}`)
+        .set('Authorization', `Bearer ${JWT}`)
+        .then((res) => {
+          expect(res.status).toEqual(200);
+          expect(res.body[0].username).toEqual(todo.username);
+          done();
+        });
+    });
+
+    it ('should be able to handle a complex query', (done) => {
+      request(app).get(`${route}?todo_id=${todo.todo_id}&user_id=${todo.user_id}&category=${todo.category}&username=${todo.username}`)
+        .set('Authorization', `Bearer ${JWT}`)
+        .then((res) => {
+          const list = res.body;
+          expect(res.status).toEqual(200);
+          expect(list[0].todo_id).toEqual(todo.todo_id);
+          expect(list[0].user_id).toEqual(todo.user_id);
+          expect(list[0].category).toEqual(todo.category);
+          expect(list[0].username).toEqual(todo.username);
+          done();
+        });
+    });
+
+    it ('should be able to do a search', (done) => {
+      request(app).get(`${route}?search=${todo.title}`)
+        .set('Authorization', `Bearer ${JWT}`)
+        .then((res) => {
+          expect(res.status).toEqual(200);
+          expect(res.body[0].title).toEqual(todo.title);
+          done();
+        });
+    });
   });
 
   describe('PUT /edit', () => {
