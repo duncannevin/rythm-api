@@ -1,9 +1,7 @@
 import { Request, Response } from 'express';
 import { default as TodoService } from '../services/todo.srvc';
-import { validateTodo } from '../validators';
-import { Todo } from '../models/todo';
+import { validateTodo, validateTodos } from '../validators';
 import * as omit from 'object.omit';
-import { street1 } from 'aws-sdk/clients/importexport';
 
 class TodoController {
   async insertTodo (req: Request, resp: Response) {
@@ -35,19 +33,37 @@ class TodoController {
     }
   }
 
-  async _filterTodos (todos: Todo[], query: string) {
-    if (query) {
-      return await todos.filter((todo) => (todo.title + todo.description).includes(query));
-    } else {
-      return await todos;
-    }
-  }
-
   async getTodos (req: Request, resp: Response) {
     try {
       const query = req.query;
-      const todos = await TodoService.queryRepository(omit(JSON.parse(JSON.stringify(query)), 'search'));
+      let todos;
+      if (query.hasOwnProperty('search')) {
+        todos = await TodoService.searchRepository(query.search, omit(query, 'search'));
+      } else {
+        todos = await TodoService.queryRepository(query);
+      }
       return resp.status(200).send(todos);
+    } catch (error) {
+      return resp.status(400).send({
+        msg: error,
+        code: 400
+      });
+    }
+  }
+
+  async insertMany (req: Request, resp: Response) {
+    const validationErrors = validateTodos(req);
+
+    if (validationErrors) {
+      return resp.status(422).send({
+        msg: validationErrors,
+        code: 422
+      });
+    }
+
+    try {
+      const todos = await TodoService.insertMany(req.body.todos);
+      return resp.status(201).send(todos);
     } catch (error) {
       return resp.status(400).send({
         msg: error,

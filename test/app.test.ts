@@ -5,6 +5,7 @@ import { default as TodoService } from '../src/services/todo.srvc';
 import { User } from '../src/models/user';
 import { Route } from '../src/types';
 import { Todo } from '../src/models/todo';
+import * as todos from '../todos.json';
 
 const userForm = {
   email: 'tester@chester.com',
@@ -19,7 +20,7 @@ const todoForm = {
   user_id: 'todo-1234',
   username: userForm.username,
   private: true,
-  title: 'getten it done',
+  title: 'getten it done5153898847',
   description: 'mississippi',
   category: 'done',
   list: [
@@ -33,10 +34,15 @@ const todoForm = {
   ]
 };
 
+beforeAll((done) => {
+  done();
+});
+
 afterAll((done) => {
   try {
     UserService.deleteOne(userForm.username);
     TodoService.deleteUsersTodos(userForm.username);
+    TodoService.deleteMany(todos.map(t => t.todo_id));
     done();
   } catch (error) {
     console.error(error);
@@ -128,6 +134,31 @@ describe('GET /users', () => {
 
 describe('/todo', () => {
   let todo: Todo;
+
+  describe('POST /insertmany', () => {
+    const route: Route = '/todo/insertmany';
+    it ('should return 401', (done) => {
+      request(app).post(route)
+        .expect(401, done);
+    });
+
+    it ('should return 422 with no body', (done) => {
+      request(app).post(route)
+        .set('Authorization', `Bearer ${JWT}`)
+        .expect(422, done);
+    });
+
+    it ('should insert many todos', (done) => {
+      request(app).post(route)
+        .set('Authorization', `Bearer ${JWT}`)
+        .send({todos: todos})
+        .then((res) => {
+          expect(res.status).toEqual(201);
+          expect(res.body.length).toEqual(todos.length);
+          done();
+        });
+    });
+  });
 
   describe('POST /insert', () => {
     const route: Route = '/todo/insert';
@@ -240,7 +271,28 @@ describe('/todo', () => {
         .set('Authorization', `Bearer ${JWT}`)
         .then((res) => {
           expect(res.status).toEqual(200);
+          expect(res.body.length).toEqual(1);
           expect(res.body[0].title).toEqual(todo.title);
+          done();
+        });
+    });
+
+    it ('should be able to search for many with same data in description', (done) => {
+      request(app).get(`${route}?search=512EEA46CEB3921DFF4363C7069D89D4964D1D9FCCAA0F411851A7AA60A5C868`)
+        .set('Authorization', `Bearer ${JWT}`)
+        .then((res) => {
+          expect(res.status).toEqual(200);
+          expect(res.body.length).toEqual(3);
+          done();
+        });
+    });
+
+    it ('it should only find one with same description as others when adding user_id to query', (done) => {
+      request(app).get(`${route}?user_id=test-4567&search=512EEA46CEB3921DFF4363C7069D89D4964D1D9FCCAA0F411851A7AA60A5C868`)
+        .set('Authorization', `Bearer ${JWT}`)
+        .then((res) => {
+          expect(res.status).toEqual(200);
+          expect(res.body.length).toEqual(1);
           done();
         });
     });

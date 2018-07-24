@@ -51,6 +51,20 @@ const TodoSchema = new mongoose.Schema({
   },
 }, {timestamps: true});
 
+TodoSchema.index({
+  'username': 'text',
+  'title': 'text',
+  'description': 'text',
+  'category': 'text'
+}, {
+  weights: {
+    username: 1,
+    title: 2,
+    description: 3,
+    category: 4
+  }
+});
+
 TodoSchema.pre('save', function save (next) {
   const todo: Todo = this;
   if (!todo.hasOwnProperty('todo_id')) {

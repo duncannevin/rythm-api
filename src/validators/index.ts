@@ -32,3 +32,9 @@ export let validateRegister = (req: Request) => {
 
   return req.validationErrors();
 };
+
+export let validateTodos = (req: Request) => {
+  req.assert('todos', 'Todos must exist and be an array').notEmpty();
+
+  return req.validationErrors();
+};

@@ -23,12 +23,33 @@ class TodoService {
   }
 
   /**
+   * @description gets Todos based on a full text search
+   * @param {string} searchString
+   * @param {object} query
+   * @return {Promise<Todo[]>}
+   */
+  async searchRepository(searchString: string, query: object): Promise<Todo[]> {
+   return await TodoRepository
+     .find({$and: [{$text: {$search: searchString}}, query]}, {score: {$meta: 'textScore'}})
+     .sort({score: {$meta: 'textScore'}}) as Todo[];
+  }
+
+  /**
    * @description queries Todos
    * @param {object} query
    * @return {Promise<Todo[]>}
    */
   async queryRepository(query: object): Promise<Todo[]> {
     return await TodoRepository.find(query) as Todo[];
+  }
+
+  /**
+   * @description inserts multiple Todos
+   * @param {Todo[]} todos
+   * @return {Promise<void>}
+   */
+  async insertMany(todos: Todo[]): Promise<Todo[]> {
+    return await TodoRepository.insertMany(todos) as Todo[];
   }
 
   /**
@@ -43,6 +64,10 @@ class TodoService {
    */
   async deleteOne(todoId: String): Promise<void> {
     return (await TodoRepository.deleteOne({todo_id: todoId}));
+  }
+
+  async deleteMany(todoIds: String[]): Promise<void> {
+    return (await TodoRepository.deleteMany({todo_id: {$in: todoIds}}));
   }
 
   /**

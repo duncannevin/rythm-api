@@ -13,6 +13,7 @@ UserRouter.get('/', UserController.getAll);
 
 const TodoRouter = Router();
 TodoRouter.post('/insert', TodoController.insertTodo);
+TodoRouter.post('/insertmany', TodoController.insertMany);
 TodoRouter.get('/query', TodoController.getTodos);
 TodoRouter.put('/edit', TodoController.editTodo);
 TodoRouter.delete('/remove/:todoId', TodoController.deleteTodo);
