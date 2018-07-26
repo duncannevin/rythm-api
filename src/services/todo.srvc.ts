@@ -1,5 +1,8 @@
 import { Todo } from '../models/todo';
 import TodoRepository, { TodoType } from '../schemas/todo.schema';
+import { TodoId, Username } from '../utils/types';
+import { Query } from '../models/query';
+import * as omit from 'object.omit';
 
 /**
  * @class TodoServer
@@ -28,7 +31,7 @@ class TodoService {
    * @param {object} query
    * @return {Promise<Todo[]>}
    */
-  async searchRepository(searchString: string, query: object): Promise<Todo[]> {
+  async searchRepository(searchString: string, query: Query): Promise<Todo[]> {
    return await TodoRepository
      .find({$and: [{$text: {$search: searchString}}, query]}, {score: {$meta: 'textScore'}})
      .sort({score: {$meta: 'textScore'}}) as Todo[];
@@ -39,8 +42,17 @@ class TodoService {
    * @param {object} query
    * @return {Promise<Todo[]>}
    */
-  async queryRepository(query: object): Promise<Todo[]> {
+  async queryRepository(query: Query): Promise<Todo[]> {
     return await TodoRepository.find(query) as Todo[];
+  }
+
+  /**
+   * @description finds a single Todo by id
+   * @param {TodoId} todoId
+   * @return {Promise<Todo>}
+   */
+  async findOne(todoId: TodoId): Promise<Todo> {
+    return await TodoRepository.findOne({todo_id: todoId});
   }
 
   /**
@@ -56,24 +68,24 @@ class TodoService {
    * @description updates a Todo in storage
    */
   async updateOne(todo: Todo): Promise<Todo> {
-    return (await TodoRepository.findOneAndUpdate({todo_id: todo.todo_id}, todo));
+    return (await TodoRepository.findOneAndUpdate({todo_id: todo.todo_id}, {$set: omit(todo, 'todo_id')}, {new: true}));
   }
 
   /**
    * @description deletes a single Todo from storage
    */
-  async deleteOne(todoId: String): Promise<void> {
-    return (await TodoRepository.deleteOne({todo_id: todoId}));
+  async deleteOne(todoId: TodoId): Promise<void> {
+    return await TodoRepository.deleteOne({todo_id: todoId});
   }
 
-  async deleteMany(todoIds: String[]): Promise<void> {
+  async deleteMany(todoIds: TodoId[]): Promise<void> {
     return (await TodoRepository.deleteMany({todo_id: {$in: todoIds}}));
   }
 
   /**
    * @description deletes all of a users Todos
    */
-  async deleteUsersTodos(username: String): Promise<void> {
+  async deleteUsersTodos(username: Username): Promise<void> {
     return (await TodoRepository.deleteMany({username: username}));
   }
 }

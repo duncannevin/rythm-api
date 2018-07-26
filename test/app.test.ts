@@ -3,11 +3,13 @@ import * as app from '../src/app';
 import { default as UserService } from '../src/services/user.srvc';
 import { default as TodoService } from '../src/services/todo.srvc';
 import { User } from '../src/models/user';
-import { Route } from '../src/types';
+import { Route } from '../src/utils/types';
 import { Todo } from '../src/models/todo';
+// @ts-ignore
 import * as todos from '../todos.json';
+import { UserRegistration } from '../src/models/user-registration';
 
-const userForm = {
+const userForm: UserRegistration = {
   email: 'tester@chester.com',
   password: 'PASSWORD',
   lname: 'Tester',
@@ -16,7 +18,7 @@ const userForm = {
   username: 'testerchester'
 };
 
-const todoForm = {
+const todoForm: Todo = {
   user_id: 'todo-1234',
   username: userForm.username,
   private: true,
@@ -203,6 +205,12 @@ describe('/todo', () => {
         .expect(401, done);
     });
 
+    it('should return 422 with invalid param', (done) => {
+      request(app).get(`${route}?bad=stuff`)
+        .set('Authorization', `Bearer ${JWT}`)
+        .expect(422, done);
+    });
+
     it('should return 200', (done) => {
       request(app).get(route)
         .set('Authorization', `Bearer ${JWT}`)
@@ -305,6 +313,25 @@ describe('/todo', () => {
       request(app).put(route)
         .expect(401, done);
     });
+
+    it('should return 422', (done) => {
+      request(app).put(route)
+        .send({})
+        .set('Authorization', `Bearer ${JWT}`)
+        .expect(422, done);
+    });
+
+    it('should return 200 after updating a value', (done) => {
+      const newUsername = 'TesterChester1234';
+      request(app).put(route)
+        .send({todo_id: todo.todo_id, username: newUsername})
+        .set('Authorization', `Bearer ${JWT}`)
+        .then((res) => {
+          expect(res.status).toEqual(200);
+          expect(res.body.username).toEqual(newUsername);
+          done();
+        });
+    });
   });
 
   describe('DELETE /remove/:todoId', () => {
@@ -313,6 +340,27 @@ describe('/todo', () => {
     it('should return 401', (done) => {
       request(app).delete(route)
         .expect(401, done);
+    });
+
+    it('should return 422 without todoId in body', (done) => {
+      request(app).delete(route)
+        .send({})
+        .set('Authorization', `Bearer ${JWT}`)
+        .expect(422, done);
+    });
+
+    it('should return 404 if todo not in the system', (done) => {
+      request(app).delete(route)
+        .send({todo_id: 'notinthesystem'})
+        .set('Authorization', `Bearer ${JWT}`)
+        .expect(404, done);
+    });
+
+    it('should return 204 after deleting a todo from the system', (done) => {
+      request(app).delete(route)
+        .send({todo_id: todo.todo_id})
+        .set('Authorization', `Bearer ${JWT}`)
+        .expect(204, done);
     });
   });
 });

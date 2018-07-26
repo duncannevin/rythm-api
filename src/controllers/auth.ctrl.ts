@@ -5,7 +5,7 @@ import * as crypto from 'crypto';
 import * as nodemailer from 'nodemailer';
 import { User } from '../models/user';
 import { default as UserService } from '../services/user.srvc';
-import { validateLogin, validateRegister } from '../validators';
+import { validateLogin, validateRegister } from '../utils/validators';
 
 class AuthController {
 
