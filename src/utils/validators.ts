@@ -51,7 +51,7 @@ export const validateTodoQuery = (req: Request): boolean | string => {
       return bool;
     }, false) ? `'${okParams.join(',')}' are the only valid query parameters` : false;
   } else {
-    return false;
+    return 'No query present with request';
   }
 };
 

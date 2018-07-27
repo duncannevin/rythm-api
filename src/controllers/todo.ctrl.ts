@@ -4,11 +4,10 @@ import {
   validateDelete, validateEditTodo,
   validateInsertTodo,
   validateInsertTodos,
-  validateLogin, validateSameUser,
+  validateSameUser,
   validateTodoQuery
 } from '../utils/validators';
 import * as omit from 'object.omit';
-import { Todo } from '../models/todo';
 
 class TodoController {
   async insertTodo (req: Request, resp: Response) {
@@ -110,7 +109,6 @@ class TodoController {
     try {
       const body = req.body;
       const todo = await TodoService.updateOne(body);
-      console.log(todo);
       return resp.status(200).send(todo);
     } catch (error) {
       return resp.status(400).send({

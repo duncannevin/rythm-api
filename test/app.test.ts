@@ -205,16 +205,16 @@ describe('/todo', () => {
         .expect(401, done);
     });
 
-    it('should return 422 with invalid param', (done) => {
-      request(app).get(`${route}?bad=stuff`)
+    it('should return 422 with no query string', (done) => {
+      request(app).get(route)
         .set('Authorization', `Bearer ${JWT}`)
         .expect(422, done);
     });
 
-    it('should return 200', (done) => {
-      request(app).get(route)
+    it('should return 422 with invalid query', (done) => {
+      request(app).get(`${route}?bad=stuff`)
         .set('Authorization', `Bearer ${JWT}`)
-        .expect(200, done);
+        .expect(422, done);
     });
 
     it('should return a todo by todo_id', (done) => {
