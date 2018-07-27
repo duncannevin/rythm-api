@@ -109,7 +109,8 @@ class AuthController {
       const token = jwt.sign({
         email: user.email,
         role: user.role,
-        username: user.username
+        username: user.username,
+        user_id: user.user_id
       }, process.env.JWT_SECRET, {expiresIn: '1h'});
       return res.status(200).send({token: token});
     } catch (error) {

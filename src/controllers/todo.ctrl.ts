@@ -4,7 +4,7 @@ import {
   validateDelete, validateEditTodo,
   validateInsertTodo,
   validateInsertTodos,
-  validateLogin,
+  validateLogin, validateSameUser,
   validateTodoQuery
 } from '../utils/validators';
 import * as omit from 'object.omit';
@@ -98,6 +98,15 @@ class TodoController {
       });
     }
 
+    const sameUserError = validateSameUser(req);
+
+    if (sameUserError) {
+      return resp.status(401).send({
+        msg: sameUserError,
+        code: 401
+      });
+    }
+
     try {
       const body = req.body;
       const todo = await TodoService.updateOne(body);
@@ -118,6 +127,15 @@ class TodoController {
       return resp.status(422).send({
         msg: validationErrors,
         code: 422
+      });
+    }
+
+    const sameUserError = validateSameUser(req);
+
+    if (sameUserError) {
+      return resp.status(401).send({
+        msg: sameUserError,
+        code: 401
       });
     }
 

@@ -19,7 +19,6 @@ const userForm: UserRegistration = {
 };
 
 const todoForm: Todo = {
-  user_id: 'todo-1234',
   username: userForm.username,
   private: true,
   title: 'getten it done5153898847',
@@ -63,6 +62,7 @@ describe('/auth', () => {
         .send(userForm)
         .then(res => {
           user = res.body;
+          todoForm.user_id = user.user_id;
           expect(res.status).toEqual(201);
           expect(user).toHaveProperty('user_id');
           done();
@@ -321,14 +321,21 @@ describe('/todo', () => {
         .expect(422, done);
     });
 
-    it('should return 200 after updating a value', (done) => {
-      const newUsername = 'TesterChester1234';
+    it('should return 401 when user_id does not match JWT', (done) => {
       request(app).put(route)
-        .send({todo_id: todo.todo_id, username: newUsername})
+        .send({todo_id: todo.todo_id, user_id: 'notarealuserid'})
+        .set('Authorization', `Bearer ${JWT}`)
+        .expect(401, done);
+    });
+
+    it('should return 200 after updating a value', (done) => {
+      const newTitle = 'This is a new title!';
+      request(app).put(route)
+        .send({todo_id: todo.todo_id, user_id: todo.user_id, title: newTitle})
         .set('Authorization', `Bearer ${JWT}`)
         .then((res) => {
           expect(res.status).toEqual(200);
-          expect(res.body.username).toEqual(newUsername);
+          expect(res.body.title).toEqual(newTitle);
           done();
         });
     });
@@ -349,16 +356,23 @@ describe('/todo', () => {
         .expect(422, done);
     });
 
+    it('should return 401 with non matching user_id', (done) => {
+      request(app).delete(route)
+        .send({user_id: 'notarealuser', todo_id: '1234'})
+        .set('Authorization', `Bearer ${JWT}`)
+        .expect(401, done);
+    });
+
     it('should return 404 if todo not in the system', (done) => {
       request(app).delete(route)
-        .send({todo_id: 'notinthesystem'})
+        .send({user_id: todo.user_id, todo_id: 'notinthesystem'})
         .set('Authorization', `Bearer ${JWT}`)
         .expect(404, done);
     });
 
     it('should return 204 after deleting a todo from the system', (done) => {
       request(app).delete(route)
-        .send({todo_id: todo.todo_id})
+        .send({user_id: todo.user_id, todo_id: todo.todo_id})
         .set('Authorization', `Bearer ${JWT}`)
         .expect(204, done);
     });

@@ -109,7 +109,7 @@
         }
       }
     },
-    "/todo/{TODO_ID}": {
+    "/todo": {
       "delete": {
         "tags": [
           "Todo"
@@ -119,7 +119,7 @@
         "parameters": [
           {
             "name": "TODO_ID",
-            "in": "path",
+            "in": "body",
             "description": "Delete by todo_id",
             "schema": {
               "type": "string"

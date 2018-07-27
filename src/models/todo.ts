@@ -2,7 +2,7 @@ import { TodoItem } from './todo-item';
 import { TodoId, UserId, Username } from '../utils/types';
 
 export interface Todo {
-  user_id: UserId;
+  user_id?: UserId;
   username: Username;
   todo_id?: TodoId;
   master?: boolean;

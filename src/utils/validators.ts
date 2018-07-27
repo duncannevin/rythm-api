@@ -1,6 +1,6 @@
 import { Request } from 'express';
-import { check } from 'express-validator/check';
-import has = Reflect.has;
+import * as jwt from 'jsonwebtoken';
+import { User } from '../models/user';
 
 export const validateInsertTodo = (req: Request) => {
   req.checkBody('user_id', 'user_id is empty').notEmpty();
@@ -63,4 +63,15 @@ export const validateDelete = (req: Request) => {
 export const validateEditTodo = (req: Request) => {
   req.checkBody('todo_id', 'Body must contain todo_id field').exists();
   return req.validationErrors();
+};
+
+export const validateSameUser = (req: Request) => {
+  const tokenHeader = req.headers.Authorization || req.headers.authorization;
+  const token = (tokenHeader as string).split(' ')[1];
+  const decoded = (jwt.decode(token) as User);
+  if (req.body.user_id !== decoded.user_id) {
+    return 'Action cannot be completed by non owner of account';
+  } else {
+    return false;
+  }
 };
