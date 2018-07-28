@@ -17,6 +17,7 @@ TodoRouter.post('/insertmany', TodoController.insertMany);
 TodoRouter.get('/query', TodoController.getTodos);
 TodoRouter.put('/edit', TodoController.editTodo);
 TodoRouter.delete('/remove', TodoController.deleteTodo);
+TodoRouter.put('/incrementthumbs', TodoController.incrementThumbs);
 
 const SwaggerAPIRouter = Router();
 

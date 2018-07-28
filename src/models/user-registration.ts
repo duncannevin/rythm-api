@@ -1,4 +1,4 @@
-import { Email, Name, Password, Role, Username } from '../utils/types';
+import { Email, Name, Password, Role, Username } from 'general-types.ts';
 
 export interface UserRegistration {
   email: Email;

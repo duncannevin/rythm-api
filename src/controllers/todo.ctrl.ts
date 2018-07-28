@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import { default as TodoService } from '../services/todo.srvc';
+import { default as RatingService } from '../services/rating.srvc';
 import {
-  validateDelete, validateEditTodo,
+  validateDelete, validateDifferentUser, validateEditTodo, validateIncrementThumbs,
   validateInsertTodo,
   validateInsertTodos,
   validateSameUser,
@@ -32,6 +33,7 @@ class TodoController {
 
       return resp.status(201).send(todo);
     } catch (error) {
+      console.log(error);
       return resp.status(400).send({
         msg: error,
         code: 400
@@ -59,6 +61,7 @@ class TodoController {
       }
       return resp.status(200).send(todos);
     } catch (error) {
+      console.log(error);
       return resp.status(400).send({
         msg: error,
         code: 400
@@ -80,6 +83,7 @@ class TodoController {
       const todos = await TodoService.insertMany(req.body.todos);
       return resp.status(201).send(todos);
     } catch (error) {
+      console.log(error);
       return resp.status(400).send({
         msg: error,
         code: 400
@@ -97,20 +101,42 @@ class TodoController {
       });
     }
 
-    const sameUserError = validateSameUser(req);
+    try {
+      const sameUserError = await validateSameUser(req);
+      if (sameUserError) {
+        return resp.status(sameUserError.code).send(sameUserError);
+      }
 
-    if (sameUserError) {
-      return resp.status(401).send({
-        msg: sameUserError,
-        code: 401
+      const todo = await TodoService.updateOne(req.body);
+      return resp.status(200).send(todo);
+    } catch (error) {
+      console.log(error);
+      return resp.status(400).send({
+        msg: error,
+        code: 400
+      });
+    }
+  }
+
+  async incrementThumbs (req: Request, resp: Response) {
+    const validationErrors = validateIncrementThumbs(req);
+
+    if (validationErrors) {
+      return resp.status(422).send({
+        msg: validationErrors,
+        code: 422
       });
     }
 
     try {
-      const body = req.body;
-      const todo = await TodoService.updateOne(body);
-      return resp.status(200).send(todo);
+      const differentUserError = await validateDifferentUser(req);
+      if (differentUserError) {
+        return resp.status(differentUserError.code).send(differentUserError);
+      }
+
+      return resp.status(200).send('PONG');
     } catch (error) {
+      console.error(error);
       return resp.status(400).send({
         msg: error,
         code: 400
@@ -128,27 +154,16 @@ class TodoController {
       });
     }
 
-    const sameUserError = validateSameUser(req);
-
-    if (sameUserError) {
-      return resp.status(401).send({
-        msg: sameUserError,
-        code: 401
-      });
-    }
-
     try {
-      const todoId = req.body.todo_id;
-      const todo = await TodoService.findOne(todoId);
-      if (!todo) {
-        return resp.status(404).send({
-          msg: `${todoId} not in the system`,
-          code: 404
-        });
+      const sameUserError = await validateSameUser(req);
+      if (sameUserError) {
+        return resp.status(sameUserError.code).send(sameUserError);
       }
-      const removed = await TodoService.deleteOne(todoId);
-      return resp.status(204).send(`${removed} Removed successfully`);
+
+      await TodoService.deleteOne(req.body.todo_id);
+      return resp.status(204).send();
     } catch (error) {
+      console.log(error);
       return resp.status(400).send({
         msg: error,
         code: 400

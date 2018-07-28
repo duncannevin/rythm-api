@@ -9,13 +9,11 @@ const TodoSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  username: {
-    type: String,
-    required: true
-  },
+  username: String,
   todo_id: String,
   master: Boolean,
   master_id: String,
+  thumbs: Number,
   private: {
     type: Boolean,
     required: true
@@ -73,6 +71,11 @@ TodoSchema.pre('save', function save (next) {
     todo.master_id = todoId;
     todo.master = true;
   }
+
+  if (!todo.hasOwnProperty('thumbs')) {
+    todo.thumbs = 0;
+  }
+
   next();
 });
 

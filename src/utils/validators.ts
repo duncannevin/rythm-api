@@ -1,6 +1,9 @@
 import { Request } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { User } from '../models/user';
+import { jwtPayload } from './helpers';
+import { Dictionary, MappedError } from 'express-validator/shared-typings';
+import { default as TodoService } from '../services/todo.srvc';
 
 export const validateInsertTodo = (req: Request) => {
   req.checkBody('user_id', 'user_id is empty').notEmpty();
@@ -65,13 +68,30 @@ export const validateEditTodo = (req: Request) => {
   return req.validationErrors();
 };
 
-export const validateSameUser = (req: Request) => {
-  const tokenHeader = req.headers.Authorization || req.headers.authorization;
-  const token = (tokenHeader as string).split(' ')[1];
-  const decoded = (jwt.decode(token) as User);
-  if (req.body.user_id !== decoded.user_id) {
-    return 'Action cannot be completed by non owner of account';
+export const validateIncrementThumbs = (req: Request) => {
+  req.checkBody('direction', 'Body must have direction property which equals `1` or `-1`').isInt();
+  req.checkBody('todo_id', 'Body must contain todo_id').exists();
+  return req.validationErrors();
+};
+
+export async function validateSameUser (req: Request) {
+  const todo = await TodoService.findOne(req.body.todo_id);
+  if (todo && todo.user_id !== jwtPayload(req).user_id) {
+    return {msg: 'Client needs to own this todo for this operation', code: 401};
+  } else if (!todo) {
+    return {msg: 'Todo not found in system', code: 404};
   } else {
     return false;
   }
-};
+}
+
+export async function validateDifferentUser (req: Request) {
+  const todo = await TodoService.findOne(req.body.todo_id);
+  if (todo && todo.user_id === jwtPayload(req).user_id) {
+    return {msg: 'Client cannot own this todo for this operation', code: 401};
+  } else if (!todo) {
+    return {msg: 'Todo not found in system', code: 404};
+  } else {
+    return false;
+  }
+}

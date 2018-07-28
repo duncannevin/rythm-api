@@ -1,6 +1,6 @@
 import { Todo } from '../models/todo';
 import TodoRepository, { TodoType } from '../schemas/todo.schema';
-import { TodoId, Username } from '../utils/types';
+import { TodoId, Username } from 'general-types.ts';
 import { Query } from '../models/query';
 import * as omit from 'object.omit';
 
@@ -61,14 +61,14 @@ class TodoService {
    * @return {Promise<void>}
    */
   async insertMany(todos: Todo[]): Promise<Todo[]> {
-    return await TodoRepository.insertMany(todos) as Todo[];
+    return await TodoRepository.create(todos) as Todo[];
   }
 
   /**
    * @description updates a Todo in storage
    */
   async updateOne(todo: Todo): Promise<Todo> {
-    return (await TodoRepository.findOneAndUpdate({todo_id: todo.todo_id}, {$set: omit(todo, 'todo_id')}, {new: true}));
+    return (await TodoRepository.findOneAndUpdate({todo_id: todo.todo_id}, {$set: todo}, {new: true}));
   }
 
   /**

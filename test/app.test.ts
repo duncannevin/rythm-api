@@ -3,7 +3,7 @@ import * as app from '../src/app';
 import { default as UserService } from '../src/services/user.srvc';
 import { default as TodoService } from '../src/services/todo.srvc';
 import { User } from '../src/models/user';
-import { Route } from '../src/utils/types';
+import { Route } from 'general-types.ts';
 import { Todo } from '../src/models/todo';
 // @ts-ignore
 import * as todos from '../todos.json';
@@ -35,6 +35,10 @@ const todoForm: Todo = {
   ]
 };
 
+let user: User;
+let JWT: string;
+let insertedTodos: Todo[];
+
 beforeAll((done) => {
   done();
 });
@@ -43,15 +47,12 @@ afterAll((done) => {
   try {
     UserService.deleteOne(userForm.username);
     TodoService.deleteUsersTodos(userForm.username);
-    TodoService.deleteMany(todos.map(t => t.todo_id));
+    TodoService.deleteMany(insertedTodos.map(t => t.todo_id));
     done();
   } catch (error) {
     console.error(error);
   }
 });
-
-let user: User;
-let JWT: string;
 
 describe('/auth', () => {
   describe('POST /register', () => {
@@ -150,11 +151,12 @@ describe('/todo', () => {
         .expect(422, done);
     });
 
-    it ('should insert many todos', (done) => {
+    it ('should insert many todos, with todo_ids added', (done) => {
       request(app).post(route)
         .set('Authorization', `Bearer ${JWT}`)
         .send({todos: todos})
         .then((res) => {
+          insertedTodos = res.body;
           expect(res.status).toEqual(201);
           expect(res.body.length).toEqual(todos.length);
           done();
@@ -193,6 +195,11 @@ describe('/todo', () => {
 
     it('should have master set to true', (done) => {
       expect(todo.master).toBe(true);
+      done();
+    });
+
+    it('should have a thumbs property set to 0', (done) => {
+      expect(todo.thumbs).toEqual(0);
       done();
     });
   });
@@ -321,14 +328,21 @@ describe('/todo', () => {
         .expect(422, done);
     });
 
-    it('should return 401 when user_id does not match JWT', (done) => {
+    it('should return 401 when trying to update a todo not owned by caller', (done) => {
       request(app).put(route)
-        .send({todo_id: todo.todo_id, user_id: 'notarealuserid'})
+        .send({todo_id: insertedTodos[0].todo_id})
         .set('Authorization', `Bearer ${JWT}`)
         .expect(401, done);
     });
 
-    it('should return 200 after updating a value', (done) => {
+    it('should return 404 if todo is not found in the system', (done) => {
+      request(app).put(route)
+        .send({todo_id: 'notinthesystem'})
+        .set('Authorization', `Bearer ${JWT}`)
+        .expect(404, done);
+    });
+
+    it('should return 200 after updating the title', (done) => {
       const newTitle = 'This is a new title!';
       request(app).put(route)
         .send({todo_id: todo.todo_id, user_id: todo.user_id, title: newTitle})
@@ -341,11 +355,42 @@ describe('/todo', () => {
     });
   });
 
-  describe('DELETE /remove/:todoId', () => {
+  describe('PUT /incrementthumbs', () => {
+    const route: Route = '/todo/incrementthumbs';
+
+    it('should return 401', (done) => {
+      request(app).put(route)
+        .expect(401, done);
+    });
+
+    it('should return 422 with inappropriate fields', (done) => {
+      request(app).put(route)
+        .send({})
+        .set('Authorization', `Bearer ${JWT}`)
+        .expect(422, done);
+    });
+
+    it('should return 401 if critiquing self', (done) => {
+     request(app).put(route)
+        .send({todo_id: todo.todo_id, direction: 1})
+        .set('Authorization', `Bearer ${JWT}`)
+        .expect(401, done);
+    });
+
+    it('should return 404 if todo not in system', (done) => {
+      request(app).put(route)
+        .send({todo_id: 'notinthesystem', direction: 100})
+        .set('Authorization', `Bearer ${JWT}`)
+        .expect(404, done);
+    });
+  });
+
+  describe('DELETE /remove', () => {
     const route: Route = '/todo/remove';
 
     it('should return 401', (done) => {
       request(app).delete(route)
+        .send({})
         .expect(401, done);
     });
 
@@ -358,7 +403,7 @@ describe('/todo', () => {
 
     it('should return 401 with non matching user_id', (done) => {
       request(app).delete(route)
-        .send({user_id: 'notarealuser', todo_id: '1234'})
+        .send({user_id: todo.user_id, todo_id: insertedTodos[0].todo_id})
         .set('Authorization', `Bearer ${JWT}`)
         .expect(401, done);
     });

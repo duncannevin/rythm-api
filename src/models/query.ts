@@ -1,4 +1,4 @@
-import { TodoId, UserId, Username } from '../utils/types';
+import { TodoId, UserId, Username } from 'general-types.ts';
 
 export interface Query {
   todo_id?: TodoId,
