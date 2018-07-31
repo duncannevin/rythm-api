@@ -1,6 +1,6 @@
 import { Todo } from '../models/todo';
 import TodoRepository, { TodoType } from '../schemas/todo.schema';
-import { TodoId, Username } from 'general-types.ts';
+import { TodoId, UserId, Username } from 'general-types.ts';
 import { Query } from '../models/query';
 import * as omit from 'object.omit';
 
@@ -14,7 +14,7 @@ class TodoService {
    * @return {Promise<Todo>}
    */
   async save(todo: Todo): Promise<Todo> {
-    return (await new TodoRepository(todo).save()).toObject({virtuals: true});
+    return await new TodoRepository(todo).save();
   }
 
   /**
@@ -52,7 +52,17 @@ class TodoService {
    * @return {Promise<Todo>}
    */
   async findOne(todoId: TodoId): Promise<Todo> {
-    return await TodoRepository.findOne({todo_id: todoId});
+    return await TodoRepository.findOne({todo_id: todoId}, {'ratings.raters': 0});
+  }
+
+  /**
+   * @description increment thumbs in ratings
+   * @param {TodoId} todoId
+   * @param {number} amount
+   * @return {Promise<Todo>}
+   */
+  async incrementThumbs(todoId: TodoId, amount: number): Promise<Todo> {
+    return (await TodoRepository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs: amount}}, {new: true}));
   }
 
   /**

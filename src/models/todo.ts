@@ -1,5 +1,5 @@
 import { TodoItem } from './todo-item';
-import { Thumbs, TodoId, UserId, Username } from 'general-types.ts';
+import { TodoId, UserId, Username } from 'general-types.ts';
 
 export interface Todo {
   user_id?: UserId;
@@ -7,7 +7,7 @@ export interface Todo {
   todo_id?: TodoId;
   master?: boolean;
   master_id?: TodoId;
-  thumbs?: Thumbs,
+  thumbs?: number,
   private?: boolean;
   title?: string;
   description?: string;

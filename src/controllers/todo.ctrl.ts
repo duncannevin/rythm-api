@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { default as TodoService } from '../services/todo.srvc';
-import { default as RatingService } from '../services/rating.srvc';
 import {
   validateDelete, validateDifferentUser, validateEditTodo, validateIncrementThumbs,
   validateInsertTodo,
@@ -9,6 +8,7 @@ import {
   validateTodoQuery
 } from '../utils/validators';
 import * as omit from 'object.omit';
+import { jwtPayload } from '../utils/helpers';
 
 class TodoController {
   async insertTodo (req: Request, resp: Response) {
@@ -133,8 +133,8 @@ class TodoController {
       if (differentUserError) {
         return resp.status(differentUserError.code).send(differentUserError);
       }
-
-      return resp.status(200).send('PONG');
+      const todo = await TodoService.incrementThumbs(req.body.todo_id, Math.sign(req.body.direction));
+      return resp.status(200).send(todo);
     } catch (error) {
       console.error(error);
       return resp.status(400).send({
