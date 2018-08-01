@@ -56,13 +56,21 @@ class TodoService {
   }
 
   /**
-   * @description increment thumbs in ratings
+   * @description increment thumbs_up
    * @param {TodoId} todoId
-   * @param {number} amount
    * @return {Promise<Todo>}
    */
-  async incrementThumbs(todoId: TodoId, amount: number): Promise<Todo> {
-    return (await TodoRepository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs: amount}}, {new: true}));
+  async thumbUp(todoId: TodoId): Promise<Todo> {
+    return (await TodoRepository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs_up: 1}}, {new: true}));
+  }
+
+  /**
+   * @description increment thumbs_down
+   * @param {TodoId} todoId
+   * @return {Promise<Todo>}
+   */
+  async thumbDown(todoId: TodoId): Promise<Todo> {
+    return (await TodoRepository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs_down: 1}}, {new: true}));
   }
 
   /**

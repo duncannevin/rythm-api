@@ -13,7 +13,8 @@ const TodoSchema = new mongoose.Schema({
   todo_id: String,
   master: Boolean,
   master_id: String,
-  thumbs: Number,
+  thumbs_up: Number,
+  thumbs_down: Number,
   private: {
     type: Boolean,
     required: true
@@ -72,8 +73,12 @@ TodoSchema.pre('save', function save (next) {
     todo.master = true;
   }
 
-  if (!todo.hasOwnProperty('thumbs')) {
-    todo.thumbs = 0;
+  if (!todo.hasOwnProperty('thumbs_up')) {
+    todo.thumbs_up = 0;
+  }
+
+  if (!todo.hasOwnProperty('thumbs_down')) {
+    todo.thumbs_down = 0;
   }
 
   next();

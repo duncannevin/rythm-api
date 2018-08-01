@@ -7,7 +7,8 @@ export interface Todo {
   todo_id?: TodoId;
   master?: boolean;
   master_id?: TodoId;
-  thumbs?: number,
+  thumbs_up?: number,
+  thumbs_down?: number,
   private?: boolean;
   title?: string;
   description?: string;

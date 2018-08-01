@@ -198,8 +198,9 @@ describe('/todo', () => {
       done();
     });
 
-    it('should have a thumbs property set to 0', (done) => {
-      expect(todo.thumbs).toEqual(0);
+    it('should have a thumbs_up and thumbs_down properties set to 0', (done) => {
+      expect(todo.thumbs_down).toEqual(0);
+      expect(todo.thumbs_up).toEqual(0);
       done();
     });
   });
@@ -355,33 +356,62 @@ describe('/todo', () => {
     });
   });
 
-  describe('PUT /incrementthumbs', () => {
-    const route: Route = '/todo/incrementthumbs';
+  describe('PUT /thumbs', () => {
+    const route: Route = '/todo/thumbs';
 
     it('should return 401', (done) => {
       request(app).put(route)
         .expect(401, done);
     });
 
-    it('should return 422 with inappropriate fields', (done) => {
+    it('should return 422 without thumb field', (done) => {
       request(app).put(route)
-        .send({})
+        .send({todo_id: insertedTodos[0].todo_id})
         .set('Authorization', `Bearer ${JWT}`)
         .expect(422, done);
     });
 
-    it('should return 401 if critiquing self', (done) => {
+    it('should return 422 with innapropriate thumb value', (done) => {
+      request(app).put(route)
+        .send({todo_id: insertedTodos[0].todo_id, thumb: 'notAthumb'})
+        .set('Authorization', `Bearer ${JWT}`)
+        .expect(422, done);
+    });
+
+    it('should return 401 if attempting to rate self', (done) => {
      request(app).put(route)
-        .send({todo_id: todo.todo_id, direction: 1})
+        .send({todo_id: todo.todo_id, thumb: 'thumbUp'})
         .set('Authorization', `Bearer ${JWT}`)
         .expect(401, done);
     });
 
     it('should return 404 if todo not in system', (done) => {
       request(app).put(route)
-        .send({todo_id: 'notinthesystem', direction: 100})
+        .send({todo_id: 'notinthesystem', thumb: 'thumbDown'})
         .set('Authorization', `Bearer ${JWT}`)
         .expect(404, done);
+    });
+
+    it('should return 200 and increment thumbs_up by one', (done) => {
+      request(app).put(route)
+        .send({todo_id: insertedTodos[0].todo_id, thumb: 'thumbUp'})
+        .set('Authorization', `Bearer ${JWT}`)
+        .then((res) => {
+          expect(res.status).toEqual(200);
+          expect(res.body.thumbs_up).toEqual(1);
+          done();
+        });
+    });
+
+    it('should return 200 and increment thumbs_down by one', (done) => {
+      request(app).put(route)
+        .send({todo_id: insertedTodos[0].todo_id, thumb: 'thumbDown'})
+        .set('Authorization', `Bearer ${JWT}`)
+        .then((res) => {
+          expect(res.status).toEqual(200);
+          expect(res.body.thumbs_down).toEqual(1);
+          done();
+        });
     });
   });
 

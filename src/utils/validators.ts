@@ -4,6 +4,7 @@ import { User } from '../models/user';
 import { jwtPayload } from './helpers';
 import { Dictionary, MappedError } from 'express-validator/shared-typings';
 import { default as TodoService } from '../services/todo.srvc';
+import { check, oneOf, validationResult } from 'express-validator/check';
 
 export const validateInsertTodo = (req: Request) => {
   req.checkBody('user_id', 'user_id is empty').notEmpty();
@@ -69,7 +70,8 @@ export const validateEditTodo = (req: Request) => {
 };
 
 export const validateIncrementThumbs = (req: Request) => {
-  req.checkBody('direction', 'Body must have direction property which equals `1` or `-1`').isInt();
+  req.checkBody('thumb').exists();
+  req.checkBody('thumb').isIn(['thumbUp', 'thumbDown']);
   req.checkBody('todo_id', 'Body must contain todo_id').exists();
   return req.validationErrors();
 };

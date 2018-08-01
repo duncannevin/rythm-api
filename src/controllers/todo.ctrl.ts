@@ -8,7 +8,6 @@ import {
   validateTodoQuery
 } from '../utils/validators';
 import * as omit from 'object.omit';
-import { jwtPayload } from '../utils/helpers';
 
 class TodoController {
   async insertTodo (req: Request, resp: Response) {
@@ -118,7 +117,7 @@ class TodoController {
     }
   }
 
-  async incrementThumbs (req: Request, resp: Response) {
+  async thumbs (req: Request, resp: Response) {
     const validationErrors = validateIncrementThumbs(req);
 
     if (validationErrors) {
@@ -133,7 +132,8 @@ class TodoController {
       if (differentUserError) {
         return resp.status(differentUserError.code).send(differentUserError);
       }
-      const todo = await TodoService.incrementThumbs(req.body.todo_id, Math.sign(req.body.direction));
+
+      const todo = await TodoService[req.body.thumb](req.body.todo_id);
       return resp.status(200).send(todo);
     } catch (error) {
       console.error(error);
