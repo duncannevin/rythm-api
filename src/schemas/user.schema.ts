@@ -17,6 +17,9 @@ const UserSchema = new mongoose.Schema({
 
   active: Boolean,
 
+  liked: [String],
+  notLiked: [String],
+
   passwordResetToken: String,
   passwordResetExpires: Date,
 
@@ -37,6 +40,12 @@ UserSchema.pre('save', function save(next) {
   const user = this;
   if (!user.isModified('password')) {
     return next();
+  }
+  if (!user.hasOwnProperty('liked')) {
+    user.liked = [];
+  }
+  if (!user.hasOwnProperty('notLiked')) {
+    user.notLiked = [];
   }
   bcrypt.genSalt(10, (err, salt) => {
     if (err) {

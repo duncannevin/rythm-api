@@ -73,6 +73,14 @@ class TodoService {
     return (await TodoRepository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs_down: 1}}, {new: true}));
   }
 
+  async decrementThumbUp(todoId: TodoId): Promise<Todo> {
+    return (await TodoRepository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs_up: -1}}, {new: true}));
+  }
+
+  async decrementThumbDown(todoId: TodoId): Promise<Todo> {
+    return (await TodoRepository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs_down: -1}}, {new: true}));
+  }
+
   /**
    * @description inserts multiple Todos
    * @param {Todo[]} todos

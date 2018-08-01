@@ -1,5 +1,6 @@
 import { AuthToken } from './auth-token';
 import { Profile } from './profile';
+import { TodoId } from '../types/general-types';
 
 export interface User {
 
@@ -11,6 +12,9 @@ export interface User {
   role?: string;
 
   active?: boolean;
+
+  liked?: TodoId[];
+  notLiked?: TodoId[];
 
   passwordResetToken?: string;
   passwordResetExpires?: Date;

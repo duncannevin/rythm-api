@@ -10,6 +10,7 @@ AuthRouter.get('/activate/:activationToken', AuthController.activate);
 
 const UserRouter = Router();
 UserRouter.get('/', UserController.getAll);
+UserRouter.get('/:userId', UserController.getUser);
 
 const TodoRouter = Router();
 TodoRouter.post('/insert', TodoController.insertTodo);

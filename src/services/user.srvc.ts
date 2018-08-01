@@ -2,6 +2,7 @@ import { User } from '../models/user';
 import * as bcrypt from 'bcrypt-nodejs';
 import * as util from 'util';
 import UserRepository, { UserType } from '../schemas/user.schema';
+import { TodoId, UserId } from '../types/general-types';
 
 /**
  * @class UserService
@@ -30,6 +31,15 @@ class UserService {
   }
 
   /**
+   * @description Fetches single user by user_id
+   * @param {UserId} userId
+   * @returns {Promise<User>}
+   */
+  async findByUserId(userId: UserId): Promise<User> {
+    return await UserRepository.findOne({user_id: userId});
+  }
+
+  /**
    * @description Saves the user in the storage
    * @param {User} user
    * @returns {Promise<User>}
@@ -46,6 +56,46 @@ class UserService {
   async findOneAndUpdate(activationToken): Promise<User> {
     const user: User = await UserRepository.findOneAndUpdate({activationToken: activationToken}, {active: true}, {new: true});
     return user;
+  }
+
+  /**
+   * @description Removes liked
+   * @param {UserId} userId
+   * @param {TodoId} todoId
+   * @return {Promise<User>}
+   */
+  async removeLiked(userId: UserId, todoId: TodoId): Promise<User> {
+    return (await UserRepository.findOneAndUpdate({user_id: userId}, {$pull: {liked: todoId}}, {new: true}));
+  }
+
+  /**
+   * @description Adds liked
+   * @param {UserId} userId
+   * @param {TodoId} todoId
+   * @return {Promise<User>}
+   */
+  async addLiked(userId: UserId, todoId: TodoId): Promise<User> {
+    return (await UserRepository.findOneAndUpdate({user_id: userId}, {$push: {liked: todoId}}, {new: true}));
+  }
+
+  /**
+   * @description Removes notLiked
+   * @param {UserId} userId
+   * @param {TodoId} todoId
+   * @return {Promise<User>}
+   */
+  async removeNotLiked(userId: UserId, todoId: TodoId): Promise<User> {
+    return (await UserRepository.findOneAndUpdate({user_id: userId}, {$pull: {notLiked: todoId}}, {new: true}));
+  }
+
+  /**
+   * @description Adds notLiked
+   * @param {UserId} userId
+   * @param {TodoId} todoId
+   * @return {Promise<User>}
+   */
+  async addNotLiked(userId: UserId, todoId: TodoId): Promise<User> {
+    return (await UserRepository.findOneAndUpdate({user_id: userId}, {$push: {notLiked: todoId}}, {new: true}));
   }
 
   /**

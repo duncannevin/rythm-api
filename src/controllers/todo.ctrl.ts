@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { default as TodoService } from '../services/todo.srvc';
+import { default as UserService } from '../services/user.srvc';
 import {
   validateDelete, validateDifferentUser, validateEditTodo, validateIncrementThumbs,
   validateInsertTodo,
@@ -8,6 +9,8 @@ import {
   validateTodoQuery
 } from '../utils/validators';
 import * as omit from 'object.omit';
+import { TodoId, UserId } from '../types/general-types';
+import { jwtPayload } from '../utils/helpers';
 
 class TodoController {
   async insertTodo (req: Request, resp: Response) {
@@ -133,10 +136,39 @@ class TodoController {
         return resp.status(differentUserError.code).send(differentUserError);
       }
 
-      const todo = await TodoService[req.body.thumb](req.body.todo_id);
+      const todoId: TodoId = req.body.todo_id;
+      const raterId: UserId = jwtPayload(req).user_id;
+      const thumb = req.body.thumb;
+
+      const rater = await UserService.findByUserId(raterId);
+      let todo;
+      if (rater.liked.includes(todoId) && thumb === 'thumbUp') {
+        await UserService.removeLiked(raterId, todoId);
+        todo = await TodoService.decrementThumbUp(todoId);
+      } else if (rater.notLiked.includes(todoId) && thumb === 'thumbDown') {
+        await UserService.removeNotLiked(raterId, todoId);
+        todo = await TodoService.decrementThumbDown(todoId);
+      } else if (rater.liked.includes(todoId) && thumb === 'thumbDown') {
+        await UserService.removeLiked(raterId, todoId);
+        await UserService.addNotLiked(raterId, todoId);
+        await TodoService.decrementThumbUp(todoId);
+        todo = await TodoService.thumbDown(todoId);
+      } else if (rater.notLiked.includes(todoId) && thumb === 'thumbUp') {
+        await UserService.removeNotLiked(raterId, todoId);
+        await UserService.addLiked(raterId, todoId);
+        await TodoService.decrementThumbDown(todoId);
+        todo = await TodoService.thumbUp(todoId);
+      } else {
+        if (thumb === 'thumbUp') {
+          await UserService.addLiked(raterId, todoId);
+        } else {
+          await UserService.addNotLiked(raterId, todoId);
+        }
+        todo = await TodoService[thumb](todoId);
+      }
       return resp.status(200).send(todo);
     } catch (error) {
-      console.error(error);
+      console.log(error);
       return resp.status(400).send({
         msg: error,
         code: 400
