@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { default as TodoService } from '../services/todo.srvc';
 import { default as UserService } from '../services/user.srvc';
 import {
+  validateComment,
   validateDelete, validateDifferentUser, validateEditTodo, validateIncrementThumbs,
   validateInsertTodo,
   validateInsertTodos,
@@ -11,6 +12,7 @@ import {
 import * as omit from 'object.omit';
 import { TodoId, UserId } from '../types/general-types';
 import { jwtPayload } from '../utils/helpers';
+import { credentialReportExpiredExceptionMessage } from 'aws-sdk/clients/iam';
 
 class TodoController {
   async insertTodo (req: Request, resp: Response) {
@@ -169,6 +171,27 @@ class TodoController {
       return resp.status(200).send(todo);
     } catch (error) {
       console.log(error);
+      return resp.status(400).send({
+        msg: error,
+        code: 400
+      });
+    }
+  }
+
+  async comment (req: Request, resp: Response) {
+    const validationErrors = validateComment(req);
+
+    if (validationErrors) {
+      return resp.status(422).send({
+        msg: validationErrors,
+        code: 422
+      });
+    }
+
+    try {
+      const todo = await TodoService.insertComment(req.body.todo_id, omit(req.body, 'todo_id'));
+      return resp.status(200).send(todo);
+    } catch (error) {
       return resp.status(400).send({
         msg: error,
         code: 400

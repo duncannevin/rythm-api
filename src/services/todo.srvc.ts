@@ -2,7 +2,7 @@ import { Todo } from '../models/todo';
 import TodoRepository, { TodoType } from '../schemas/todo.schema';
 import { TodoId, UserId, Username } from 'general-types.ts';
 import { Query } from '../models/query';
-import * as omit from 'object.omit';
+import { Comment } from '../models/comment';
 
 /**
  * @class TodoServer
@@ -73,12 +73,32 @@ class TodoService {
     return (await TodoRepository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs_down: 1}}, {new: true}));
   }
 
+  /**
+   * @description increment thumbs_up
+   * @param {TodoId} todoId
+   * @return {Promise<Todo>}
+   */
   async decrementThumbUp(todoId: TodoId): Promise<Todo> {
     return (await TodoRepository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs_up: -1}}, {new: true}));
   }
 
+  /**
+   * @description decrement thumbs_down
+   * @param {TodoId} todoId
+   * @return {Promise<Todo>}
+   */
   async decrementThumbDown(todoId: TodoId): Promise<Todo> {
     return (await TodoRepository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs_down: -1}}, {new: true}));
+  }
+
+  /**
+   * @description insert comments into Todo comment array
+   * @param {TodoId} todoId
+   * @param {Promise<Todo>} comment
+   */
+  async insertComment(todoId: TodoId, comment: Comment): Promise<Todo> {
+    comment.date = new Date().toString();
+    return (await TodoRepository.findOneAndUpdate({todo_id: todoId}, {$push: {comments: comment}}, {new: true}));
   }
 
   /**

@@ -31,6 +31,13 @@ const TodoSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  comments: [
+    {
+      username: String,
+      text: String,
+      date: String
+    }
+  ],
   list: {
     type: Array,
     default: [

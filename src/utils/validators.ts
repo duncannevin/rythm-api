@@ -97,3 +97,9 @@ export async function validateDifferentUser (req: Request) {
     return false;
   }
 }
+
+export function validateComment (req: Request) {
+  req.checkBody('todo_id', 'todo_id must be present').exists();
+  req.checkBody('text', 'Must include a comment').exists();
+  return req.validationErrors();
+}

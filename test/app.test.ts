@@ -66,6 +66,8 @@ describe('/auth', () => {
           todoForm.user_id = user.user_id;
           expect(res.status).toEqual(201);
           expect(user).toHaveProperty('user_id');
+          expect(user).toHaveProperty('liked');
+          expect(user).toHaveProperty('notLiked');
           done();
         });
     });
@@ -132,6 +134,16 @@ describe('GET /users', () => {
     request(app).get(route)
       .set('Authorization', `Bearer ${JWT}`)
       .expect(200, done);
+  });
+
+  it('should return 200 with a user', (done) => {
+    request(app).get(`${route}/${user.user_id}`)
+      .set('Authorization', `Bearer ${JWT}`)
+      .then((res) => {
+        expect(res.status).toEqual(200);
+        expect(res.body).toHaveProperty('user_id');
+        done();
+      });
   });
 });
 
@@ -392,24 +404,161 @@ describe('/todo', () => {
         .expect(404, done);
     });
 
-    it('should return 200 and increment thumbs_up by one', (done) => {
-      request(app).put(route)
-        .send({todo_id: insertedTodos[0].todo_id, thumb: 'thumbUp'})
-        .set('Authorization', `Bearer ${JWT}`)
-        .then((res) => {
-          expect(res.status).toEqual(200);
-          expect(res.body.thumbs_up).toEqual(1);
-          done();
-        });
+    describe('Increase thumbs_up/thumbs_down them decrease thumbs_up/thumbs_down by calling same again', () => {
+      it('should return 200 and increment thumbs_up by one', (done) => {
+        request(app).put(route)
+          .send({todo_id: insertedTodos[0].todo_id, thumb: 'thumbUp'})
+          .set('Authorization', `Bearer ${JWT}`)
+          .then((res) => {
+            expect(res.status).toEqual(200);
+            expect(res.body.thumbs_up).toEqual(1);
+            done();
+          });
+      });
+
+      it('should return 200 and increment thumbs_down by one', (done) => {
+        request(app).put(route)
+          .send({todo_id: insertedTodos[1].todo_id, thumb: 'thumbDown'})
+          .set('Authorization', `Bearer ${JWT}`)
+          .then((res) => {
+            expect(res.status).toEqual(200);
+            expect(res.body.thumbs_down).toEqual(1);
+            done();
+          });
+      });
+
+      it('user should have correct todoIds in like and notLiked fields', (done) => {
+        request(app).get(`/users/${user.user_id}`)
+          .set('Authorization', `Bearer ${JWT}`)
+          .then((res) => {
+            expect(res.status).toEqual(200);
+            expect(res.body.notLiked).toHaveLength(1);
+            expect(res.body.liked).toHaveLength(1);
+            expect(res.body.notLiked).toContain(insertedTodos[1].todo_id);
+            expect(res.body.liked).toContain(insertedTodos[0].todo_id);
+            done();
+          });
+      });
+
+      it('should decrement thumbs_up by one if same user calls thumbUp a second time', (done) => {
+        request(app).put(route)
+          .send({todo_id: insertedTodos[0].todo_id, thumb: 'thumbUp'})
+          .set('Authorization', `Bearer ${JWT}`)
+          .then((res) => {
+            expect(res.status).toEqual(200);
+            expect(res.body.thumbs_up).toEqual(0);
+            done();
+          });
+      });
+
+      it('should decrement thumbs_down by one if same user calls thumbDown a second time', (done) => {
+        request(app).put(route)
+          .send({todo_id: insertedTodos[1].todo_id, thumb: 'thumbDown'})
+          .set('Authorization', `Bearer ${JWT}`)
+          .then((res) => {
+            expect(res.status).toEqual(200);
+            expect(res.body.thumbs_down).toEqual(0);
+            done();
+          });
+      });
+
+      it('user should have empty liked and notLiked fields', (done) => {
+        request(app).get(`/users/${user.user_id}`)
+          .set('Authorization', `Bearer ${JWT}`)
+          .then((res) => {
+            expect(res.status).toEqual(200);
+            // expect(res.body.notLiked).toHaveLength(0);
+            expect(res.body.liked).toHaveLength(0);
+            done();
+          });
+      });
     });
 
-    it('should return 200 and increment thumbs_down by one', (done) => {
-      request(app).put(route)
-        .send({todo_id: insertedTodos[0].todo_id, thumb: 'thumbDown'})
+    describe('Increase thumbs_up/thumbs_down then swap values if opposite called later', () => {
+      it('should return 200 and increment thumbs_up by one', (done) => {
+        request(app).put(route)
+          .send({todo_id: insertedTodos[0].todo_id, thumb: 'thumbUp'})
+          .set('Authorization', `Bearer ${JWT}`)
+          .then((res) => {
+            expect(res.status).toEqual(200);
+            expect(res.body.thumbs_up).toEqual(1);
+            done();
+          });
+      });
+
+      it('should return 200 and increment thumbs_down by one', (done) => {
+        request(app).put(route)
+          .send({todo_id: insertedTodos[0].todo_id, thumb: 'thumbDown'})
+          .set('Authorization', `Bearer ${JWT}`)
+          .then((res) => {
+            expect(res.status).toEqual(200);
+            expect(res.body.thumbs_up).toEqual(0);
+            expect(res.body.thumbs_down).toEqual(1);
+            done();
+          });
+      });
+
+      it('user should have a the correct todo_id in the notLiked field', (done) => {
+        request(app).get(`/users/${user.user_id}`)
+          .set('Authorization', `Bearer ${JWT}`)
+          .then((res) => {
+            expect(res.status).toEqual(200);
+            expect(res.body.notLiked).toHaveLength(1);
+            expect(res.body.liked).toHaveLength(0);
+            expect(res.body.notLiked).toContain(insertedTodos[0].todo_id);
+            done();
+          });
+      });
+
+      it('should return 200 and increment thumbs_up by one', (done) => {
+        request(app).put(route)
+          .send({todo_id: insertedTodos[0].todo_id, thumb: 'thumbUp'})
+          .set('Authorization', `Bearer ${JWT}`)
+          .then((res) => {
+            expect(res.status).toEqual(200);
+            expect(res.body.thumbs_up).toEqual(1);
+            done();
+          });
+      });
+
+      it('user should have a the correct todo_id in the liked field', (done) => {
+        request(app).get(`/users/${user.user_id}`)
+          .set('Authorization', `Bearer ${JWT}`)
+          .then((res) => {
+            expect(res.status).toEqual(200);
+            expect(res.body.notLiked).toHaveLength(0);
+            expect(res.body.liked).toHaveLength(1);
+            expect(res.body.liked).toContain(insertedTodos[0].todo_id);
+            done();
+          });
+      });
+    });
+  });
+
+  describe('POST /comment', () => {
+    const route = '/todo/comment';
+
+    it('should return 401', (done) => {
+      request(app).post(route)
+        .expect(401, done);
+    });
+
+    it('should return 422 with missing fields', (done) => {
+      request(app).post(route)
+        .send({})
+        .set('Authorization', `Bearer ${JWT}`)
+        .expect(422, done);
+    });
+
+    it('should return 200 and insert a comment', (done) => {
+      request(app).post(route)
+        .send({todo_id: todo.todo_id, username: 'someguynamedfred', text: 'This is good!'})
         .set('Authorization', `Bearer ${JWT}`)
         .then((res) => {
           expect(res.status).toEqual(200);
-          expect(res.body.thumbs_down).toEqual(1);
+          expect(res.body.comments).toHaveLength(1);
+          expect(res.body.comments[0].username).toEqual('someguynamedfred');
+          expect(res.body.comments[0].text).toEqual('This is good!');
           done();
         });
     });

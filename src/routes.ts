@@ -19,6 +19,7 @@ TodoRouter.get('/query', TodoController.getTodos);
 TodoRouter.put('/edit', TodoController.editTodo);
 TodoRouter.delete('/remove', TodoController.deleteTodo);
 TodoRouter.put('/thumbs', TodoController.thumbs);
+TodoRouter.post('/comment', TodoController.comment);
 
 const SwaggerAPIRouter = Router();
 

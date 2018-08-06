@@ -1,4 +1,5 @@
 import { TodoItem } from './todo-item';
+import { Comment} from './comment';
 import { TodoId, UserId, Username } from 'general-types.ts';
 
 export interface Todo {
@@ -13,5 +14,6 @@ export interface Todo {
   title?: string;
   description?: string;
   category?: string;
+  comments?: Array<Comment>
   list?: Array<TodoItem>;
 }
