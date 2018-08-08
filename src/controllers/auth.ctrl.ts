@@ -8,6 +8,16 @@ import { default as UserService } from '../services/user.srvc';
 import { validateLogin, validateRegister } from '../utils/validators';
 
 class AuthController {
+  async registerSocialUser(req: Request, resp: Response) {
+    const user: User =  req.user;
+    const token = jwt.sign({
+      email: user.email,
+      role: user.role,
+      display_name: user.display_name,
+      user_id: user.user_id
+    }, process.env.JWT_SECRET, {expiresIn: '1h'});
+    resp.status(200).send(token);
+  }
 
   async login(req: Request, resp: Response) {
     const errors = validateLogin(req);
@@ -31,7 +41,8 @@ class AuthController {
         const token = jwt.sign({
           email: user.email,
           role: user.role,
-          username: user.username
+          username: user.username,
+          user_id: user.user_id
         }, process.env.JWT_SECRET, {expiresIn: '1h'});
         return resp.status(200).send({token: token});
       } else {
@@ -105,7 +116,7 @@ class AuthController {
 
   async activate(req: Request, res: Response) {
     try {
-      const user: User = await UserService.findOneAndUpdate(req.params.activationToken);
+      const user: User = await UserService.activateUser(req.params.activationToken);
       const token = jwt.sign({
         email: user.email,
         role: user.role,

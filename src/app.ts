@@ -13,11 +13,12 @@ import * as expressJwt from 'express-jwt';
 import * as swaggerUI from 'swagger-ui-express';
 import * as swaggerDocument from '../swagger.json';
 import { AuthRouter, TodoRouter, UserRouter, SwaggerAPIRouter } from './routes';
+import * as passport from 'passport';
 
 const MongoStore = mongo(session);
 
 // Load environment variables from .env file, where API keys and passwords are configured
-dotenv.config({path: '.env' || '.env.example'});
+dotenv.config({path: '.env'});
 
 // Create Express server
 const app = express();
@@ -52,6 +53,8 @@ app.use(session({
 }));
 app.use(lusca.xframe('SAMEORIGIN'));
 app.use(lusca.xssProtection(true));
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(expressJwt({
     secret: process.env.JWT_SECRET,

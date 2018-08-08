@@ -2,11 +2,24 @@ import { Router } from 'express';
 import AuthController from './controllers/auth.ctrl';
 import UserController from './controllers/user.ctrl';
 import TodoController from './controllers/todo.ctrl';
+import SocialAuthController from './controllers/social.auth.ctrl';
 
 const AuthRouter = Router();
 AuthRouter.post('/login', AuthController.login);
 AuthRouter.post('/register', AuthController.register);
 AuthRouter.get('/activate/:activationToken', AuthController.activate);
+
+AuthRouter.get('/linkedin', SocialAuthController.authenticate('linkedin', {session: false}), AuthController.registerSocialUser); // todo - enter correct scope
+AuthRouter.get('/linkedin/callback', SocialAuthController.authenticate('linkedin'), AuthController.registerSocialUser);
+
+AuthRouter.get('/github', SocialAuthController.authenticate('github', {scope: 'user:email', session: false}));
+AuthRouter.get('/github/callback', SocialAuthController.authenticate('github'), AuthController.registerSocialUser);
+
+AuthRouter.get('/twitter', SocialAuthController.authenticate('twitter', {scope: 'email', session: false})); // todo - enter correct scope
+AuthRouter.get('/twitter/callback', SocialAuthController.authenticate('twitter'), AuthController.registerSocialUser);
+
+AuthRouter.get('/google', SocialAuthController.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login', 'https://www.googleapis.com/auth/plus.profile.emails.read'], session: false }));
+AuthRouter.get('/google/callback', SocialAuthController.authenticate('google'), AuthController.registerSocialUser);
 
 const UserRouter = Router();
 UserRouter.get('/', UserController.getAll);

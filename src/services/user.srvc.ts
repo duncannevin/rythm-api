@@ -8,6 +8,14 @@ import { TodoId, UserId } from '../types/general-types';
  * @class UserService
  */
 class UserService {
+  /**
+   * @description Finds user by id
+   * @param id
+   * @return {Promise<User>}
+   */
+    async findById(id: string): Promise<User> {
+      return await UserRepository.findById(id);
+  }
 
   /**
    * @description Fetches single user from the storage by email
@@ -53,9 +61,18 @@ class UserService {
    * @param activationToken
    * @returns {Promise<User>}
    */
-  async findOneAndUpdate(activationToken): Promise<User> {
+  async activateUser(activationToken): Promise<User> {
     const user: User = await UserRepository.findOneAndUpdate({activationToken: activationToken}, {active: true}, {new: true});
     return user;
+  }
+
+  /**
+   * @description Creates or updates a current user (for social auth)
+   * @param {User} user
+   * @return {Promise<User>}
+   */
+  async updateOrCreate(user: User): Promise<User> {
+    return (await UserRepository.findOneAndUpdate({user_id: user.user_id}, user, {upsert: true, new: true}));
   }
 
   /**

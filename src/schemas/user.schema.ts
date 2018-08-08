@@ -9,8 +9,9 @@ export type UserType = mongoose.Document & User & {
 };
 
 const UserSchema = new mongoose.Schema({
-  email: {type: String, unique: true},
+  email: String,
   username: {type: String, unique: true},
+  display_name: String,
   user_id: {type: String, unique: true},
   password: String,
   role: String,

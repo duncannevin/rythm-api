@@ -1,5 +1,5 @@
 import { TodoItem } from './todo-item';
-import { Comment} from './comment';
+import { Comment } from './comment';
 import { TodoId, UserId, Username } from 'general-types.ts';
 
 export interface Todo {
