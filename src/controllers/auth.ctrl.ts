@@ -68,7 +68,7 @@ class AuthController {
       }
       // Generate activation token
       user.activationToken = await activationTokenGen();
-      user.activationExpires = activationExpiration(); // does nothing at this point
+      user.activationExpires = activationExpiration(); // does nothing at this point (not sure I will ever implement)
       // Send activation email
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
@@ -82,8 +82,8 @@ class AuthController {
       const mailOptions = {
         to: user.email,
         from: process.env.SMTP_USER,
-        subject: 'Account activation',
-        text: `You are receiving this email because you (or someone else) have requested account activation.\n\n
+        subject: 'Rythm account activation',
+        text: `You are receiving this email because you (or someone else) have requested account activation with Rythm.\n\n
           Please click on the following link, or paste this into your browser to complete the process:\n\n
           http://${req.headers.host}/auth/activate/${user.activationToken}\n\n
           If you did not request this, please ignore this email\n`

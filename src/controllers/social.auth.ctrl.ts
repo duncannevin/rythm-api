@@ -19,7 +19,7 @@ async function oauth1Callback (token, tokenSecret, profile, done) {
   };
   try {
     user.activationToken = await activationTokenGen();
-    user.activationExpires = activationExpiration(); // does nothing at this point
+    user.activationExpires = activationExpiration(); // does nothing at this point (not sure I will ever implement)
     const addedUser = await UserService.updateOrCreate(user);
     done(undefined, addedUser);
   } catch  (error) {
@@ -36,7 +36,7 @@ async function oauth2Callback (request, accessToken, refreshToken, profile: Prof
   };
   try {
     user.activationToken = await activationTokenGen();
-    user.activationExpires = activationExpiration(); // does nothing at this point
+    user.activationExpires = activationExpiration(); // does nothing at this point(not sure I will ever implement)
     const addedUser = await UserService.updateOrCreate(user);
     done(undefined, addedUser);
   } catch  (error) {
