@@ -8,18 +8,14 @@ const AuthRouter = Router();
 AuthRouter.post('/login', AuthController.login);
 AuthRouter.post('/register', AuthController.register);
 AuthRouter.get('/activate/:activationToken', AuthController.activate);
-
-AuthRouter.get('/linkedin', SocialAuthController.authenticate('linkedin', {session: false}), AuthController.registerSocialUser); // todo - enter correct scope
-AuthRouter.get('/linkedin/callback', SocialAuthController.authenticate('linkedin'), AuthController.registerSocialUser);
-
+AuthRouter.get('/linkedin', SocialAuthController.authenticate('linkedin', {session: false}), AuthController.activate);
+AuthRouter.get('/linkedin/callback', SocialAuthController.authenticate('linkedin'), AuthController.activate);
 AuthRouter.get('/github', SocialAuthController.authenticate('github', {scope: 'user:email', session: false}));
-AuthRouter.get('/github/callback', SocialAuthController.authenticate('github'), AuthController.registerSocialUser);
-
-AuthRouter.get('/twitter', SocialAuthController.authenticate('twitter', {scope: 'email', session: false})); // todo - enter correct scope
-AuthRouter.get('/twitter/callback', SocialAuthController.authenticate('twitter'), AuthController.registerSocialUser);
-
+AuthRouter.get('/github/callback', SocialAuthController.authenticate('github'), AuthController.activate);
+AuthRouter.get('/twitter', SocialAuthController.authenticate('twitter', {scope: 'email', session: false}));
+AuthRouter.get('/twitter/callback', SocialAuthController.authenticate('twitter'), AuthController.activate);
 AuthRouter.get('/google', SocialAuthController.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login', 'https://www.googleapis.com/auth/plus.profile.emails.read'], session: false }));
-AuthRouter.get('/google/callback', SocialAuthController.authenticate('google'), AuthController.registerSocialUser);
+AuthRouter.get('/google/callback', SocialAuthController.authenticate('google'), AuthController.activate);
 
 const UserRouter = Router();
 UserRouter.get('/', UserController.getAll);

@@ -1,24 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
-import * as util from 'util';
-import * as crypto from 'crypto';
 import * as nodemailer from 'nodemailer';
 import { User } from '../models/user';
 import { default as UserService } from '../services/user.srvc';
 import { validateLogin, validateRegister } from '../utils/validators';
+import { activationExpiration, activationTokenGen } from '../utils/helpers';
 
 class AuthController {
-  async registerSocialUser(req: Request, resp: Response) {
-    const user: User =  req.user;
-    const token = jwt.sign({
-      email: user.email,
-      role: user.role,
-      display_name: user.display_name,
-      user_id: user.user_id
-    }, process.env.JWT_SECRET, {expiresIn: '1h'});
-    resp.status(200).send(token);
-  }
-
   async login(req: Request, resp: Response) {
     const errors = validateLogin(req);
 
@@ -59,7 +47,7 @@ class AuthController {
     }
   }
 
-  async register(req: Request, res: Response, next: NextFunction) {
+  async register(req: Request, res: Response, _next: NextFunction) {
     const errors = validateRegister(req);
 
     if (errors) {
@@ -79,10 +67,8 @@ class AuthController {
         });
       }
       // Generate activation token
-      const qRandomBytes = (util as any).promisify(crypto.randomBytes);
-      const cryptedValue = await qRandomBytes(16);
-      user.activationToken = cryptedValue.toString('hex');
-      user.activationExpires = new Date(Date.now() + 3600000); // 1 hour
+      user.activationToken = await activationTokenGen();
+      user.activationExpires = activationExpiration(); // does nothing at this point
       // Send activation email
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
@@ -116,7 +102,8 @@ class AuthController {
 
   async activate(req: Request, res: Response) {
     try {
-      const user: User = await UserService.activateUser(req.params.activationToken);
+      const activationToken = req.user ? req.user.activationToken : req.params.activationToken;
+      const user: User = await UserService.activateUser(activationToken);
       const token = jwt.sign({
         email: user.email,
         role: user.role,

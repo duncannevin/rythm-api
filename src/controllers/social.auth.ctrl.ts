@@ -8,16 +8,18 @@ import { passportInit } from '../utils/passport-init';
 import { linkedin, github, twitter, google } from '../_config';
 import { Profile } from 'passport';
 import { User } from '../models/user';
+import { activationExpiration, activationTokenGen } from '../utils/helpers';
 
 async function oauth1Callback (token, tokenSecret, profile, done) {
   const user: User = {
     display_name: profile.displayName,
     email: profile.emails[0].value,
     user_id: `${profile.provider}|${profile.id}`,
-    role: 'guest',
-    active: true
+    role: 'guest'
   };
   try {
+    user.activationToken = await activationTokenGen();
+    user.activationExpires = activationExpiration(); // does nothing at this point
     const addedUser = await UserService.updateOrCreate(user);
     done(undefined, addedUser);
   } catch  (error) {
@@ -30,10 +32,11 @@ async function oauth2Callback (request, accessToken, refreshToken, profile: Prof
     display_name: profile.displayName,
     email: profile.emails[0].value,
     user_id: `${profile.provider}|${profile.id}`,
-    role: 'guest',
-    active: true
+    role: 'guest'
   };
   try {
+    user.activationToken = await activationTokenGen();
+    user.activationExpires = activationExpiration(); // does nothing at this point
     const addedUser = await UserService.updateOrCreate(user);
     done(undefined, addedUser);
   } catch  (error) {
@@ -43,7 +46,6 @@ async function oauth2Callback (request, accessToken, refreshToken, profile: Prof
 
 /**
  * @description Linkedin oauth
- * todo - 500 error
  */
 passport.use(new LinkedInStrategy.Strategy({
   clientID: linkedin.LINKEDIN_CLIENT_ID || 'CREATE-A-_config.ts-FILE',
@@ -55,7 +57,6 @@ passport.use(new LinkedInStrategy.Strategy({
 
 /**
  * @description Github oauth
- * todo - 500 error on callback
  */
 passport.use(new GitHubStrategy({
     clientID: github.GITHUB_CLIENT_ID || 'CREATE-A-_config.ts-FILE',
@@ -65,7 +66,6 @@ passport.use(new GitHubStrategy({
 
 /**
  * @description Twitter oauth
- * todo - cannot read email data
  */
 passport.use(new TwitterStrategy({
     consumerKey: twitter.TWITTER_CLIENT_ID || 'CREATE-A-_config.ts-FILE',
@@ -76,7 +76,6 @@ passport.use(new TwitterStrategy({
 
 /**
  * @description Google oauth
- * todo - callback not working
  */
 passport.use(new GoogleStrategy.Strategy({
   clientID: google.GOOGLE_CLIENT_ID || 'CREATE-A-_config.ts-FILE',
