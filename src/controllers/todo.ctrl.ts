@@ -12,7 +12,6 @@ import {
 import * as omit from 'object.omit';
 import { TodoId, UserId } from '../types/general-types';
 import { jwtPayload } from '../utils/helpers';
-import { credentialReportExpiredExceptionMessage } from 'aws-sdk/clients/iam';
 
 class TodoController {
   async insertTodo (req: Request, resp: Response) {

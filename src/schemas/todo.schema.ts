@@ -9,10 +9,7 @@ const TodoSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  username: {
-    type: String,
-    unique: true
-  },
+  username: String,
   todo_id: String,
   master: Boolean,
   master_id: String,
@@ -36,7 +33,7 @@ const TodoSchema = new mongoose.Schema({
   },
   comments: [
     {
-      username: String,
+      user_id: String,
       text: String,
       date: String
     }

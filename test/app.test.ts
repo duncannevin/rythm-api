@@ -391,7 +391,7 @@ describe('/todo', () => {
     });
 
     it('should return 401 if attempting to rate self', (done) => {
-     request(app).put(route)
+      request(app).put(route)
         .send({todo_id: todo.todo_id, thumb: 'thumbUp'})
         .set('Authorization', `Bearer ${JWT}`)
         .expect(401, done);
@@ -552,12 +552,12 @@ describe('/todo', () => {
 
     it('should return 200 and insert a comment', (done) => {
       request(app).post(route)
-        .send({todo_id: todo.todo_id, username: 'someguynamedfred', text: 'This is good!'})
+        .send({todo_id: todo.todo_id, user_id: todos[0].user_id, text: 'This is good!'})
         .set('Authorization', `Bearer ${JWT}`)
         .then((res) => {
           expect(res.status).toEqual(200);
           expect(res.body.comments).toHaveLength(1);
-          expect(res.body.comments[0].username).toEqual('someguynamedfred');
+          expect(res.body.comments[0].user_id).toEqual(todos[0].user_id);
           expect(res.body.comments[0].text).toEqual('This is good!');
           done();
         });

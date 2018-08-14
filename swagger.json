@@ -22,10 +22,10 @@
     }
   ],
   "securityDefinitions": {
-    "Bearer": {
-      "name": "Authorization",
-      "description": "API Token",
+    "JWT": {
+      "description": "",
       "type": "apiKey",
+      "name": "Authorization",
       "in": "header"
     }
   },
@@ -39,13 +39,18 @@
     "application/json"
   ],
   "paths": {
-    "/todo": {
+    "/todo/insert": {
       "post": {
         "tags": [
           "Todo"
         ],
         "summary": "Submit new todo list",
         "description": "Submit new todo list",
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
         "parameters": [
           {
             "name": "todo",
@@ -73,13 +78,61 @@
             }
           }
         }
-      },
+      }
+    },
+    "/todo/insertmany": {
+      "post": {
+        "tags": [
+          "Todo"
+        ],
+        "summary": "Insert many todos",
+        "description": "Insert many todos",
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "todo",
+            "in": "body",
+            "description": "List of todos",
+            "schema": {
+              "$ref": "#/definitions/ListTodo"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of todos",
+            "schema": {
+              "$ref": "#/definitions/Todo"
+            }
+          },
+          "401": {
+            "description": "UnAuthorized",
+            "schema": {
+              "$ref": "#/definitions/UnAuthorized"
+            }
+          }
+        }
+      }
+    },
+    "/todo/edit": {
       "put": {
         "tags": [
           "Todo"
         ],
-        "summary": "Update current todo",
+        "summary": "Update current todo, can only edit own todo as identified by jwt",
         "description": "Todo must be owned by JWT holder",
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
         "parameters": [
           {
             "name": "todo",
@@ -109,13 +162,18 @@
         }
       }
     },
-    "/todo": {
+    "/todo/remove": {
       "delete": {
         "tags": [
           "Todo"
         ],
-        "summary": "Delete a todo",
+        "summary": "Delete a todo, can only delete own todo as identified by JWT",
         "description": "TODO_ID must be owned by JWT holder",
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
         "parameters": [
           {
             "name": "TODO_ID",
@@ -145,13 +203,100 @@
         }
       }
     },
-    "/todo?category={CATEGORY}&todo_id={TODO_ID}&search={STRING}&user_id={USER_ID}&username={USERNAME}": {
+    "/todo/thumbs": {
+      "put": {
+        "tags": [
+          "Todo"
+        ],
+        "summary": "Increase or decrease a todo thumbs, can only thumb up a different users todo as identified by JWT",
+        "description": "Increase or decrease a todo thumbs",
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "todo",
+            "in": "body",
+            "description": "Tell the server thumb up or thumb down",
+            "schema": {
+              "$ref": "#/definitions/TodoThumbs"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated todo",
+            "schema": {
+              "$ref": "#/definitions/Todo"
+            }
+          },
+          "401": {
+            "description": "UnAuthorized",
+            "schema": {
+              "$ref": "#/definitions/UnAuthorized"
+            }
+          }
+        }
+      }
+    },
+    "/todo/comment": {
+      "put": {
+        "tags": [
+          "Todo"
+        ],
+        "summary": "Adds a comment to a todo",
+        "description": "Adds a comment to a todo",
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "todo",
+            "in": "body",
+            "description": "Tell the server thumb up or thumb down",
+            "schema": {
+              "$ref": "#/definitions/TodoThumbs"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Todo",
+            "schema": {
+              "$ref": "#/definitions/Todo"
+            }
+          },
+          "401": {
+            "description": "UnAuthorized",
+            "schema": {
+              "$ref": "#/definitions/UnAuthorized"
+            }
+          }
+        }
+      }
+    },
+    "/todo/query?category={CATEGORY}&todo_id={TODO_ID}&search={STRING}&user_id={USER_ID}&username={USERNAME}": {
       "get": {
         "tags": [
           "Todo"
         ],
         "summary": "Get a list of todos",
         "description": "If JWT does not match user_id no private todos will be returned.",
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
         "parameters": [
           {
             "name": "CATEGORY",
@@ -202,6 +347,130 @@
             "description": "A list of todos",
             "schema": {
               "$ref": "#/definitions/ListTodos"
+            }
+          },
+          "401": {
+            "description": "UnAuthorized",
+            "schema": {
+              "$ref": "#/definitions/UnAuthorized"
+            }
+          }
+        }
+      }
+    },
+    "/auth/github": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with github",
+        "description": "Oauth2 authentication",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UnAuthorized",
+            "schema": {
+              "$ref": "#/definitions/UnAuthorized"
+            }
+          }
+        }
+      }
+    },
+    "/auth/google": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with google",
+        "description": "Oauth2 authentication",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UnAuthorized",
+            "schema": {
+              "$ref": "#/definitions/UnAuthorized"
+            }
+          }
+        }
+      }
+    },
+    "/auth/twitter": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with twitter",
+        "description": "Oauth1 authentication",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UnAuthorized",
+            "schema": {
+              "$ref": "#/definitions/UnAuthorized"
+            }
+          }
+        }
+      }
+    },
+    "/auth/linkedin": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with linkedin",
+        "description": "Oauth2 authentication",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string"
+                }
+              }
             }
           },
           "401": {
@@ -336,34 +605,44 @@
         }
       }
     },
-    "users?user_id={USER_ID}&username={USERNAME}": {
+    "/users": {
       "get": {
         "tags": [
           "Users"
         ],
         "security": [
           {
-            "Bearer": []
+            "JWT": []
+          }
+        ],
+        "summary": "Get users",
+        "responses": {
+          "200": {
+            "description": "List of users",
+            "schema": {
+              "$ref": "#/definitions/Users"
+            }
+          }
+        }
+      }
+    },
+    "/users/{USER_ID}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "JWT": []
           }
         ],
         "parameters": [
           {
             "name": "USER_ID",
-            "in": "query",
-            "summary": "Query user based on user id",
-            "description": "User id must match what is found in JWT",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "USERNAME",
-            "in": "query",
-            "summary": "Query user based on username",
-            "description": "Username must match what is found in JWT",
-            "schema": {
-              "type": "string"
-            }
+            "in": "path",
+            "required": true,
+            "description": "User_id for desired user",
+            "type": "string"
           }
         ],
         "description": "Get a user by user_id or username. If neither is found will return all users if JWT indicates correct role.",
@@ -426,7 +705,45 @@
         "list": {
           "type": "array",
           "$ref": "#/definitions/TodoItem"
+        },
+        "comments": {
+          "type": "array",
+          "$ref": "#/definitions/Comment"
         }
+      }
+    },
+    "Comment": {
+      "properties": {
+        "todo_id": {"type": "string"},
+        "user_id": {"type": "string"},
+        "text": {"type": "string"}
+      }
+    },
+    "TodoThumbs": {
+      "required": [
+        "todo_id",
+        "thumb"
+      ],
+      "properties": {
+        "todo_id": {
+          "type": "string"
+        },
+        "thumb": {
+          "type": "string",
+          "description": "thumbUp or thumbDown"
+        }
+      }
+    },
+    "TodoComment": {
+      "required": [
+        "todo_id",
+        "user_id",
+        "text"
+      ],
+      "properties": {
+        "todo_id": {"type": "string"},
+        "user_id": {"type": "string"},
+        "text": {"type": "string"}
       }
     },
     "TodoItem": {

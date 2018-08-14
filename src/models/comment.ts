@@ -1,7 +1,7 @@
-import { UserId, Username } from '../types/general-types';
+import { UserId } from '../types/general-types';
 
 export interface Comment {
-  username: Username;
+  user_id: UserId;
   text: string;
   date: string;
 }
