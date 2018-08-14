@@ -2,7 +2,7 @@ import { Router } from 'express';
 import AuthController from './controllers/auth.ctrl';
 import UserController from './controllers/user.ctrl';
 import TodoController from './controllers/todo.ctrl';
-import SocialAuthController from './controllers/social.auth.ctrl';
+import SocialAuthController from './auth/config.auth';
 
 const AuthRouter = Router();
 AuthRouter.post('/login', AuthController.login);
@@ -10,7 +10,7 @@ AuthRouter.post('/register', AuthController.register);
 AuthRouter.get('/activate/:activationToken', AuthController.activate);
 AuthRouter.get('/linkedin', SocialAuthController.authenticate('linkedin', {session: false}), AuthController.activate);
 AuthRouter.get('/linkedin/callback', SocialAuthController.authenticate('linkedin'), AuthController.activate);
-AuthRouter.get('/github', SocialAuthController.authenticate('github', {scope: 'user:email', session: false}));
+AuthRouter.get('/github', SocialAuthController.authenticate('github', {session: false}));
 AuthRouter.get('/github/callback', SocialAuthController.authenticate('github'), AuthController.activate);
 AuthRouter.get('/twitter', SocialAuthController.authenticate('twitter', {scope: 'email', session: false}));
 AuthRouter.get('/twitter/callback', SocialAuthController.authenticate('twitter'), AuthController.activate);
