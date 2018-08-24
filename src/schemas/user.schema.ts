@@ -10,7 +10,12 @@ export type UserType = mongoose.Document & UserMdl & {
 
 const UserSchema = new mongoose.Schema({
   email: String,
-  username: {type: String, unique: true},
+  username: {
+    type: String,
+    trim: true,
+    unique: true,
+    sparse: true
+  },
   display_name: String,
   user_id: {type: String, unique: true},
   password: String,

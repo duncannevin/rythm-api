@@ -15,6 +15,8 @@ import * as swaggerDocument from '../swagger.json';
 import { AuthRouter, TodoRouter, UserRouter, SwaggerAPIRouter } from './routes';
 import * as log4js from 'log4js';
 import * as passport from 'passport';
+import * as favicon from 'serve-favicon';
+import * as path from 'path';
 
 const MongoStore = mongo(session);
 
@@ -57,6 +59,8 @@ app.use(lusca.xframe('SAMEORIGIN'));
 app.use(lusca.xssProtection(true));
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use(favicon(path.join(__dirname, '../static', 'icon.png')));
 
 app.use(expressJwt({
     secret: process.env.JWT_SECRET,
