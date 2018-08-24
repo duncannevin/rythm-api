@@ -9,8 +9,9 @@ import { linkedin, github, twitter, google } from '../config/keys.conf';
 import { Profile } from 'passport';
 import { UserMdl } from '../models/user.mdl';
 import { activationExpiration, activationTokenGen } from '../utils/helpers.utl';
+import { authLogger } from '../utils/loggers.utl';
 
-async function oauth1Callback (token, tokenSecret, profile, done) {
+async function oauth1Callback (token, tokenSecret, profile: Profile, done) {
   const user: UserMdl = {
     display_name: profile.displayName,
     email: profile.emails[0].value,
@@ -21,8 +22,10 @@ async function oauth1Callback (token, tokenSecret, profile, done) {
     user.activationToken = await activationTokenGen();
     user.activationExpires = activationExpiration(); // does nothing at this point (not sure I will ever implement)
     const addedUser = await UserService.updateOrCreate(user);
+    authLogger.info('oauth1 successful', profile.provider);
     done(undefined, addedUser);
   } catch  (error) {
+    authLogger.debug('oauth1 failed', profile.provider, error);
     done(error, undefined);
   }
 }
@@ -38,8 +41,10 @@ async function oauth2Callback (request, accessToken, refreshToken, profile: Prof
     user.activationToken = await activationTokenGen();
     user.activationExpires = activationExpiration(); // does nothing at this point(not sure I will ever implement)
     const addedUser = await UserService.updateOrCreate(user);
+    authLogger.info('oauth2 successful', profile.provider);
     done(undefined, addedUser);
   } catch  (error) {
+    authLogger.debug('oauth2 failed', profile.provider, error);
     done(error, undefined);
   }
 }
