@@ -36,4 +36,4 @@ dist/**/*
 
 coverage
 
-src/auth/keys.auth.ts
+src/config/keys.conf.ts

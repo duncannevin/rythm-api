@@ -1,8 +1,8 @@
-import { AuthToken } from './auth-token';
-import { Profile } from './profile';
+import { AuthTokenMdl } from './auth-token.mdl';
+import { ProfileMdl } from './profile.mdl';
 import { TodoId } from '../types/general-types';
 
-export interface User {
+export interface UserMdl {
 
   email?: string;
   username?: string;
@@ -23,7 +23,7 @@ export interface User {
   activationToken?: string;
   activationExpires?: Date;
 
-  tokens?: Array<AuthToken>;
+  tokens?: Array<AuthTokenMdl>;
 
-  profile?: Profile;
+  profile?: ProfileMdl;
 }

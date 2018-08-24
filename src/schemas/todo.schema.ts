@@ -1,8 +1,8 @@
 import * as mongoose from 'mongoose';
-import { Todo } from '../models/todo';
+import { TodoMdl } from '../models/todo.mdl';
 import * as uniqId from 'uniqid';
 
-export type TodoType = mongoose.Document & Todo;
+export type TodoType = mongoose.Document & TodoMdl;
 
 const TodoSchema = new mongoose.Schema({
   user_id: {
@@ -72,7 +72,7 @@ TodoSchema.index({
 });
 
 TodoSchema.pre('save', function save (next) {
-  const todo: Todo = this;
+  const todo: TodoMdl = this;
   if (!todo.hasOwnProperty('todo_id')) {
     const todoId = uniqId('todo-');
     todo.todo_id = todoId;
@@ -91,6 +91,6 @@ TodoSchema.pre('save', function save (next) {
   next();
 });
 
-type TodoType = Todo & mongoose.Document;
-const TodoRepository = mongoose.model<TodoType>('Todo', TodoSchema);
+type TodoType = TodoMdl & mongoose.Document;
+const TodoRepository = mongoose.model<TodoType>('TodoMdl', TodoSchema);
 export default TodoRepository;

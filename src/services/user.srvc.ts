@@ -1,4 +1,4 @@
-import { User } from '../models/user';
+import { UserMdl } from '../models/user.mdl';
 import * as bcrypt from 'bcrypt-nodejs';
 import * as util from 'util';
 import UserRepository, { UserType } from '../schemas/user.schema';
@@ -11,18 +11,18 @@ class UserService {
   /**
    * @description Finds user by id
    * @param id
-   * @return {Promise<User>}
+   * @return {Promise<UserMdl>}
    */
-    async findById(id: string): Promise<User> {
+    async findById(id: string): Promise<UserMdl> {
       return await UserRepository.findById(id);
   }
 
   /**
    * @description Fetches single user from the storage by email
    * @param email
-   * @returns {Promise<User>}
+   * @returns {Promise<UserMdl>}
    */
-  async findByEmail(email): Promise<User> {
+  async findByEmail(email): Promise<UserMdl> {
     const user: UserType = await UserRepository.findOne({email: email});
     return user;
   }
@@ -31,47 +31,47 @@ class UserService {
    * @description Fetches single user from the storage by email or username
    * @param username
    * @param email
-   * @returns {Promise<User>}
+   * @returns {Promise<UserMdl>}
    */
-  async findByUsernameOrEmail(username, email): Promise<User> {
-    const user: User = await UserRepository.findOne({$or: [{email: email}, {username: username}]});
+  async findByUsernameOrEmail(username, email): Promise<UserMdl> {
+    const user: UserMdl = await UserRepository.findOne({$or: [{email: email}, {username: username}]});
     return user;
   }
 
   /**
    * @description Fetches single user by user_id
    * @param {UserId} userId
-   * @returns {Promise<User>}
+   * @returns {Promise<UserMdl>}
    */
-  async findByUserId(userId: UserId): Promise<User> {
+  async findByUserId(userId: UserId): Promise<UserMdl> {
     return await UserRepository.findOne({user_id: userId});
   }
 
   /**
    * @description Saves the user in the storage
-   * @param {User} user
-   * @returns {Promise<User>}
+   * @param {UserMdl} user
+   * @returns {Promise<UserMdl>}
    */
-  async save(user: User): Promise<User> {
+  async save(user: UserMdl): Promise<UserMdl> {
     return (await new UserRepository(user).save()).toObject({ virtuals: true });
   }
 
   /**
    * @description Fetches single user by activationToken and sets active flag
    * @param activationToken
-   * @returns {Promise<User>}
+   * @returns {Promise<UserMdl>}
    */
-  async activateUser(activationToken): Promise<User> {
-    const user: User = await UserRepository.findOneAndUpdate({activationToken: activationToken}, {active: true}, {new: true});
+  async activateUser(activationToken): Promise<UserMdl> {
+    const user: UserMdl = await UserRepository.findOneAndUpdate({activationToken: activationToken}, {active: true}, {new: true});
     return user;
   }
 
   /**
    * @description Creates or updates a current user (for social auth)
-   * @param {User} user
-   * @return {Promise<User>}
+   * @param {UserMdl} user
+   * @return {Promise<UserMdl>}
    */
-  async updateOrCreate(user: User): Promise<User> {
+  async updateOrCreate(user: UserMdl): Promise<UserMdl> {
     return (await UserRepository.findOneAndUpdate({user_id: user.user_id}, user, {upsert: true, new: true}));
   }
 
@@ -79,9 +79,9 @@ class UserService {
    * @description Removes liked
    * @param {UserId} userId
    * @param {TodoId} todoId
-   * @return {Promise<User>}
+   * @return {Promise<UserMdl>}
    */
-  async removeLiked(userId: UserId, todoId: TodoId): Promise<User> {
+  async removeLiked(userId: UserId, todoId: TodoId): Promise<UserMdl> {
     return (await UserRepository.findOneAndUpdate({user_id: userId}, {$pull: {liked: todoId}}, {new: true}));
   }
 
@@ -89,9 +89,9 @@ class UserService {
    * @description Adds liked
    * @param {UserId} userId
    * @param {TodoId} todoId
-   * @return {Promise<User>}
+   * @return {Promise<UserMdl>}
    */
-  async addLiked(userId: UserId, todoId: TodoId): Promise<User> {
+  async addLiked(userId: UserId, todoId: TodoId): Promise<UserMdl> {
     return (await UserRepository.findOneAndUpdate({user_id: userId}, {$push: {liked: todoId}}, {new: true}));
   }
 
@@ -99,9 +99,9 @@ class UserService {
    * @description Removes notLiked
    * @param {UserId} userId
    * @param {TodoId} todoId
-   * @return {Promise<User>}
+   * @return {Promise<UserMdl>}
    */
-  async removeNotLiked(userId: UserId, todoId: TodoId): Promise<User> {
+  async removeNotLiked(userId: UserId, todoId: TodoId): Promise<UserMdl> {
     return (await UserRepository.findOneAndUpdate({user_id: userId}, {$pull: {notLiked: todoId}}, {new: true}));
   }
 
@@ -109,18 +109,18 @@ class UserService {
    * @description Adds notLiked
    * @param {UserId} userId
    * @param {TodoId} todoId
-   * @return {Promise<User>}
+   * @return {Promise<UserMdl>}
    */
-  async addNotLiked(userId: UserId, todoId: TodoId): Promise<User> {
+  async addNotLiked(userId: UserId, todoId: TodoId): Promise<UserMdl> {
     return (await UserRepository.findOneAndUpdate({user_id: userId}, {$push: {notLiked: todoId}}, {new: true}));
   }
 
   /**
    * @description Fetches all users from the storage
-   * @returns {Promise<User[]>}
+   * @returns {Promise<UserMdl[]>}
    */
-  async findAll(): Promise<User[]> {
-    return await UserRepository.find() as User[];
+  async findAll(): Promise<UserMdl[]> {
+    return await UserRepository.find() as UserMdl[];
   }
 
   async deleteOne(username: String): Promise<void> {

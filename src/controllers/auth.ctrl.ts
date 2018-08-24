@@ -1,24 +1,26 @@
 import { Request, Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
 import * as nodemailer from 'nodemailer';
-import { User } from '../models/user';
+import { UserMdl } from '../models/user.mdl';
 import { default as UserService } from '../services/user.srvc';
-import { validateLogin, validateRegister } from '../utils/validators';
-import { activationExpiration, activationTokenGen } from '../utils/helpers';
+import { validateLogin, validateRegister } from '../utils/validators.utl';
+import { activationExpiration, activationTokenGen } from '../utils/helpers.utl';
+import { authLogger } from '../utils/loggers.utl';
 
 class AuthController {
   async login(req: Request, resp: Response) {
-    const errors = validateLogin(req);
-
-    if (errors) {
+    const validationErrors = validateLogin(req);
+    if (validationErrors) {
+      authLogger.debug('login validation errors', validationErrors);
       return resp.status(401).send({
-        msg: errors,
+        msg: validationErrors,
         code: 406
       });
     }
     try {
-      const user: User = await UserService.findByEmail(req.body.email);
+      const user: UserMdl = await UserService.findByEmail(req.body.email);
       if (!user) {
+        authLogger.debug('login user does not exist');
         return resp.status(404).send({
           msg: 'User not found',
           code: 404
@@ -32,14 +34,17 @@ class AuthController {
           username: user.username,
           user_id: user.user_id
         }, process.env.JWT_SECRET, {expiresIn: '1h'});
+        authLogger.info('login successful');
         return resp.status(200).send({token: token});
       } else {
+        authLogger.debug('login unauthorized');
         return resp.status(401).send({
           msg: 'Unauthorized',
           status: 401
         });
       }
     } catch (error) {
+      authLogger.debug('login failed', error);
       return resp.status(400).send({
         msg: error,
         code: 400
@@ -48,21 +53,23 @@ class AuthController {
   }
 
   async register(req: Request, res: Response, _next: NextFunction) {
-    const errors = validateRegister(req);
+    const validationErrors = validateRegister(req);
 
-    if (errors) {
+    if (validationErrors) {
+      authLogger.debug('register validation errors', validationErrors);
       return res.status(401).send({
-        msg: errors,
+        msg: validationErrors,
         status: 401
       });
     }
-    const user: User = req.body;
+    const user: UserMdl = req.body;
     try {
       // Check if user already exists
       const existingUser = await UserService.findByUsernameOrEmail(user.username, user.email);
       if (existingUser) {
+        authLogger.debug('register user already exists', existingUser.user_id);
         return res.status(409).send({
-          msg: 'User already exists',
+          msg: 'UserMdl already exists',
           status: 409
         });
       }
@@ -89,10 +96,12 @@ class AuthController {
           If you did not request this, please ignore this email\n`
       };
       await transporter.sendMail(mailOptions);
-      const savedUser: User = await UserService.save(user);
+      authLogger.info('register email sent');
+      const savedUser: UserMdl = await UserService.save(user);
+      authLogger.info('register successful');
       res.status(201).send(savedUser);
     } catch (error) {
-      console.log(error);
+      authLogger.debug('register failed', error);
       res.status(400).send({
         msg: 'Unable to send email',
         status: 400
@@ -103,16 +112,17 @@ class AuthController {
   async activate(req: Request, res: Response) {
     try {
       const activationToken = req.user ? req.user.activationToken : req.params.activationToken;
-      const user: User = await UserService.activateUser(activationToken);
+      const user: UserMdl = await UserService.activateUser(activationToken);
       const token = jwt.sign({
         email: user.email,
         role: user.role,
         username: user.username,
         user_id: user.user_id
       }, process.env.JWT_SECRET, {expiresIn: '1h'});
+      authLogger.info('activate successful');
       return res.status(200).send({token: token});
     } catch (error) {
-      console.log(error);
+      authLogger.debug('activate failed', error);
       res.status(400).send({
         msg: 'Activation token expired, please register again',
         status: 400

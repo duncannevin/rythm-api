@@ -1,8 +1,8 @@
-import { TodoItem } from './todo-item';
-import { Comment } from './comment';
+import { TodoItemMdl } from './todo-item.mdl';
+import { CommentMdl } from './comment.mdl';
 import { TodoId, UserId, Username } from 'general-types.ts';
 
-export interface Todo {
+export interface TodoMdl {
   user_id?: UserId;
   username?: Username;
   todo_id?: TodoId;
@@ -14,6 +14,6 @@ export interface Todo {
   title?: string;
   description?: string;
   category?: string;
-  comments?: Array<Comment>
-  list?: Array<TodoItem>;
+  comments?: Array<CommentMdl>
+  list?: Array<TodoItemMdl>;
 }

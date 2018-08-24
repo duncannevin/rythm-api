@@ -8,16 +8,18 @@ import {
   validateInsertTodos,
   validateSameUser,
   validateTodoQuery
-} from '../utils/validators';
+} from '../utils/validators.utl';
 import * as omit from 'object.omit';
 import { TodoId, UserId } from '../types/general-types';
-import { jwtPayload } from '../utils/helpers';
+import { jwtPayload } from '../utils/helpers.utl';
+import { todoLogger } from '../utils/loggers.utl';
 
 class TodoController {
   async insertTodo (req: Request, resp: Response) {
     const validationErrors = validateInsertTodo(req);
 
     if (validationErrors) {
+      todoLogger.debug('insertTodo validation error', validationErrors);
       return resp.status(422).send({
         msg: validationErrors,
         code: 422
@@ -28,15 +30,16 @@ class TodoController {
       const todo = await TodoService.save(req.body);
 
       if (!todo) {
+        todoLogger.debug('insertTodo failed to insert todo');
         return resp.status(404).send({
           msg: 'Failed to insert user',
           code: 404
         });
       }
-
+      todoLogger.info('insertTodo success');
       return resp.status(201).send(todo);
     } catch (error) {
-      console.log(error);
+      todoLogger.debug('insertTodo failed', error);
       return resp.status(400).send({
         msg: error,
         code: 400
@@ -48,6 +51,7 @@ class TodoController {
     const validationErrors = validateTodoQuery(req);
 
     if (validationErrors) {
+      todoLogger.debug('getTodos validation error', validationErrors);
       return resp.status(422).send({
         msg: validationErrors,
         code: 422
@@ -62,9 +66,10 @@ class TodoController {
       } else {
         todos = await TodoService.queryRepository(query);
       }
+      todoLogger.info('getTodos success');
       return resp.status(200).send(todos);
     } catch (error) {
-      console.log(error);
+      todoLogger.debug('getTodos failed', error);
       return resp.status(400).send({
         msg: error,
         code: 400
@@ -76,6 +81,7 @@ class TodoController {
     const validationErrors = validateInsertTodos(req);
 
     if (validationErrors) {
+      todoLogger.debug('insertMany validation error', validationErrors);
       return resp.status(422).send({
         msg: validationErrors,
         code: 422
@@ -84,9 +90,10 @@ class TodoController {
 
     try {
       const todos = await TodoService.insertMany(req.body.todos);
+      todoLogger.info('insertMany success');
       return resp.status(201).send(todos);
     } catch (error) {
-      console.log(error);
+      todoLogger.debug('insertMany failed', error);
       return resp.status(400).send({
         msg: error,
         code: 400
@@ -98,6 +105,7 @@ class TodoController {
     const validationErrors = validateEditTodo(req);
 
     if (validationErrors) {
+      todoLogger.debug('editTodo validation error', validationErrors);
       return resp.status(422).send({
         msg: validationErrors,
         code: 422
@@ -107,13 +115,15 @@ class TodoController {
     try {
       const sameUserError = await validateSameUser(req);
       if (sameUserError) {
+        todoLogger.debug('editTodo same user error', sameUserError);
         return resp.status(sameUserError.code).send(sameUserError);
       }
 
       const todo = await TodoService.updateOne(req.body);
+      todoLogger.info('editTodd successful');
       return resp.status(200).send(todo);
     } catch (error) {
-      console.log(error);
+      todoLogger.debug('editTodo failed', error);
       return resp.status(400).send({
         msg: error,
         code: 400
@@ -125,6 +135,7 @@ class TodoController {
     const validationErrors = validateIncrementThumbs(req);
 
     if (validationErrors) {
+      todoLogger.debug('thumbs validation error', validationErrors);
       return resp.status(422).send({
         msg: validationErrors,
         code: 422
@@ -134,6 +145,7 @@ class TodoController {
     try {
       const differentUserError = await validateDifferentUser(req);
       if (differentUserError) {
+        todoLogger.debug('thumbs different user error', differentUserError);
         return resp.status(differentUserError.code).send(differentUserError);
       }
 
@@ -167,9 +179,10 @@ class TodoController {
         }
         todo = await TodoService[thumb](todoId);
       }
+      todoLogger.info('thumbs successful');
       return resp.status(200).send(todo);
     } catch (error) {
-      console.log(error);
+      todoLogger.debug('thumbs failed', error);
       return resp.status(400).send({
         msg: error,
         code: 400
@@ -181,6 +194,7 @@ class TodoController {
     const validationErrors = validateComment(req);
 
     if (validationErrors) {
+      todoLogger.debug('comment validation error', validationErrors);
       return resp.status(422).send({
         msg: validationErrors,
         code: 422
@@ -189,8 +203,10 @@ class TodoController {
 
     try {
       const todo = await TodoService.insertComment(req.body.todo_id, omit(req.body, 'todo_id'));
+      todoLogger.info('comment successful');
       return resp.status(200).send(todo);
     } catch (error) {
+      todoLogger.debug('comment failed', error);
       return resp.status(400).send({
         msg: error,
         code: 400
@@ -202,6 +218,7 @@ class TodoController {
     const validationErrors = validateDelete(req);
 
     if (validationErrors) {
+      todoLogger.debug('deleteTodo validation error', validationErrors);
       return resp.status(422).send({
         msg: validationErrors,
         code: 422
@@ -211,13 +228,15 @@ class TodoController {
     try {
       const sameUserError = await validateSameUser(req);
       if (sameUserError) {
+        todoLogger.debug('deleteTodo same user error', sameUserError);
         return resp.status(sameUserError.code).send(sameUserError);
       }
 
       await TodoService.deleteOne(req.body.todo_id);
+      todoLogger.info('deleteTodo successful');
       return resp.status(204).send();
     } catch (error) {
-      console.log(error);
+      todoLogger.debug('deleteTodo failed');
       return resp.status(400).send({
         msg: error,
         code: 400

@@ -1,124 +1,124 @@
-import { Todo } from '../models/todo';
+import { TodoMdl } from '../models/todo.mdl';
 import TodoRepository, { TodoType } from '../schemas/todo.schema';
 import { TodoId, UserId, Username } from 'general-types.ts';
-import { Query } from '../models/query';
-import { Comment } from '../models/comment';
+import { QueryMdl } from '../models/query.mdl';
+import { CommentMdl } from '../models/comment.mdl';
 
 /**
  * @class TodoServer
  */
 class TodoService {
   /**
-   * @description saves Todo to storage
-   * @param {Todo} todo
-   * @return {Promise<Todo>}
+   * @description saves TodoMdl to storage
+   * @param {TodoMdl} todo
+   * @return {Promise<TodoMdl>}
    */
-  async save(todo: Todo): Promise<Todo> {
+  async save(todo: TodoMdl): Promise<TodoMdl> {
     return await new TodoRepository(todo).save();
   }
 
   /**
    * @description fetches all Todos from storage
-   * @return {Promise<Todo[]>}
+   * @return {Promise<TodoMdl[]>}
    */
-  async fetchAll(): Promise<Todo[]> {
-    return await TodoRepository.find() as Todo[];
+  async fetchAll(): Promise<TodoMdl[]> {
+    return await TodoRepository.find() as TodoMdl[];
   }
 
   /**
    * @description gets Todos based on a full text search
    * @param {string} searchString
    * @param {object} query
-   * @return {Promise<Todo[]>}
+   * @return {Promise<TodoMdl[]>}
    */
-  async searchRepository(searchString: string, query: Query): Promise<Todo[]> {
+  async searchRepository(searchString: string, query: QueryMdl): Promise<TodoMdl[]> {
    return await TodoRepository
      .find({$and: [{$text: {$search: searchString}}, query]}, {score: {$meta: 'textScore'}})
-     .sort({score: {$meta: 'textScore'}}) as Todo[];
+     .sort({score: {$meta: 'textScore'}}) as TodoMdl[];
   }
 
   /**
    * @description queries Todos
    * @param {object} query
-   * @return {Promise<Todo[]>}
+   * @return {Promise<TodoMdl[]>}
    */
-  async queryRepository(query: Query): Promise<Todo[]> {
-    return await TodoRepository.find(query) as Todo[];
+  async queryRepository(query: QueryMdl): Promise<TodoMdl[]> {
+    return await TodoRepository.find(query) as TodoMdl[];
   }
 
   /**
-   * @description finds a single Todo by id
+   * @description finds a single TodoMdl by id
    * @param {TodoId} todoId
-   * @return {Promise<Todo>}
+   * @return {Promise<TodoMdl>}
    */
-  async findOne(todoId: TodoId): Promise<Todo> {
+  async findOne(todoId: TodoId): Promise<TodoMdl> {
     return await TodoRepository.findOne({todo_id: todoId}, {'ratings.raters': 0});
   }
 
   /**
    * @description increment thumbs_up
    * @param {TodoId} todoId
-   * @return {Promise<Todo>}
+   * @return {Promise<TodoMdl>}
    */
-  async thumbUp(todoId: TodoId): Promise<Todo> {
+  async thumbUp(todoId: TodoId): Promise<TodoMdl> {
     return (await TodoRepository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs_up: 1}}, {new: true}));
   }
 
   /**
    * @description increment thumbs_down
    * @param {TodoId} todoId
-   * @return {Promise<Todo>}
+   * @return {Promise<TodoMdl>}
    */
-  async thumbDown(todoId: TodoId): Promise<Todo> {
+  async thumbDown(todoId: TodoId): Promise<TodoMdl> {
     return (await TodoRepository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs_down: 1}}, {new: true}));
   }
 
   /**
    * @description increment thumbs_up
    * @param {TodoId} todoId
-   * @return {Promise<Todo>}
+   * @return {Promise<TodoMdl>}
    */
-  async decrementThumbUp(todoId: TodoId): Promise<Todo> {
+  async decrementThumbUp(todoId: TodoId): Promise<TodoMdl> {
     return (await TodoRepository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs_up: -1}}, {new: true}));
   }
 
   /**
    * @description decrement thumbs_down
    * @param {TodoId} todoId
-   * @return {Promise<Todo>}
+   * @return {Promise<TodoMdl>}
    */
-  async decrementThumbDown(todoId: TodoId): Promise<Todo> {
+  async decrementThumbDown(todoId: TodoId): Promise<TodoMdl> {
     return (await TodoRepository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs_down: -1}}, {new: true}));
   }
 
   /**
-   * @description insert comments into Todo comment array
+   * @description insert comments into TodoMdl comment array
    * @param {TodoId} todoId
-   * @param {Promise<Todo>} comment
+   * @param {Promise<TodoMdl>} comment
    */
-  async insertComment(todoId: TodoId, comment: Comment): Promise<Todo> {
+  async insertComment(todoId: TodoId, comment: CommentMdl): Promise<TodoMdl> {
     comment.date = new Date().toString();
     return (await TodoRepository.findOneAndUpdate({todo_id: todoId}, {$push: {comments: comment}}, {new: true}));
   }
 
   /**
    * @description inserts multiple Todos
-   * @param {Todo[]} todos
+   * @param {TodoMdl[]} todos
    * @return {Promise<void>}
    */
-  async insertMany(todos: Todo[]): Promise<Todo[]> {
-    return await TodoRepository.create(todos) as Todo[];
+  async insertMany(todos: TodoMdl[]): Promise<TodoMdl[]> {
+    return await TodoRepository.create(todos) as TodoMdl[];
   }
 
   /**
-   * @description updates a Todo in storage
+   * @description updates a TodoMdl in storage
    */
-  async updateOne(todo: Todo): Promise<Todo> {
+  async updateOne(todo: TodoMdl): Promise<TodoMdl> {
     return (await TodoRepository.findOneAndUpdate({todo_id: todo.todo_id}, {$set: todo}, {new: true}));
   }
 
   /**
-   * @description deletes a single Todo from storage
+   * @description deletes a single TodoMdl from storage
    */
   async deleteOne(todoId: TodoId): Promise<void> {
     return await TodoRepository.deleteOne({todo_id: todoId});

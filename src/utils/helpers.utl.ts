@@ -1,12 +1,12 @@
 import * as jwt from 'jsonwebtoken';
-import { User } from '../models/user';
+import { UserMdl } from '../models/user.mdl';
 import * as util from 'util';
 import * as crypto from 'crypto';
 
-export function jwtPayload (req): User {
+export function jwtPayload (req): UserMdl {
   const tokenHeader = req.headers.Authorization || req.headers.authorization;
   const token = (tokenHeader as string).split(' ')[1];
-  return (jwt.decode(token) as User);
+  return (jwt.decode(token) as UserMdl);
 }
 
 export async function activationTokenGen(): Promise<string> {

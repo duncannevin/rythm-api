@@ -1,10 +1,10 @@
 import * as mongoose from 'mongoose';
 import * as bcrypt from 'bcrypt-nodejs';
 import * as util from 'util';
-import { User } from '../models/user';
+import { UserMdl } from '../models/user.mdl';
 import * as uniqId from 'uniqid';
 
-export type UserType = mongoose.Document & User & {
+export type UserType = mongoose.Document & UserMdl & {
   comparePassword: (candidatePassword: string, cb: (err: any, isMatch: any) => {}) => void
 };
 
@@ -75,6 +75,6 @@ UserSchema.methods.comparePassword = function (candidatePassword: string) {
   return qCompare(candidatePassword, this.password);
 };
 
-type UserType = User & mongoose.Document;
-const UserRepository = mongoose.model<UserType>('User', UserSchema);
+type UserType = UserMdl & mongoose.Document;
+const UserRepository = mongoose.model<UserType>('UserMdl', UserSchema);
 export default UserRepository;

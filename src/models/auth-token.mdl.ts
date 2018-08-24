@@ -1,4 +1,4 @@
-export type AuthToken = {
+export type AuthTokenMdl = {
   accessToken: string,
   kind: string
 };

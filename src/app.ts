@@ -13,6 +13,7 @@ import * as expressJwt from 'express-jwt';
 import * as swaggerUI from 'swagger-ui-express';
 import * as swaggerDocument from '../swagger.json';
 import { AuthRouter, TodoRouter, UserRouter, SwaggerAPIRouter } from './routes';
+import * as log4js from 'log4js';
 import * as passport from 'passport';
 
 const MongoStore = mongo(session);
@@ -36,6 +37,7 @@ mongoose.connect(mongoUrl, {useMongoClient: true})
   });
 
 // Express configuration
+app.use(log4js.connectLogger(log4js.getLogger('http'), { level: 'auto' }));
 app.set('port', process.env.PORT || 3000);
 app.use(compression());
 app.use(logger('dev'));

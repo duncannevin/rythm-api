@@ -1,6 +1,6 @@
 # Rythm_api
 
-Todo list collaboration. 
+TodoMdl list collaboration. 
 
 # Pre-reqs
 - Install [Node.js](https://nodejs.org/en/)

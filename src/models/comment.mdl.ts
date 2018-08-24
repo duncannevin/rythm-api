@@ -1,6 +1,6 @@
 import { UserId } from '../types/general-types';
 
-export interface Comment {
+export interface CommentMdl {
   user_id: UserId;
   text: string;
   date: string;

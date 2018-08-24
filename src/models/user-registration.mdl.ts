@@ -1,6 +1,6 @@
 import { Email, Name, Password, Role, Username } from 'general-types.ts';
 
-export interface UserRegistration {
+export interface UserRegistrationMdl {
   email: Email;
   password: Password;
   lname: Name;

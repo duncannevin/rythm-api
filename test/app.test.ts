@@ -2,14 +2,15 @@ import * as request from 'supertest';
 import * as app from '../src/app';
 import { default as UserService } from '../src/services/user.srvc';
 import { default as TodoService } from '../src/services/todo.srvc';
-import { User } from '../src/models/user';
+import { UserMdl } from '../src/models/user.mdl';
 import { Route } from 'general-types.ts';
-import { Todo } from '../src/models/todo';
+import { TodoMdl } from '../src/models/todo.mdl';
+import { UserRegistrationMdl } from '../src/models/user-registration.mdl';
+
 // @ts-ignore
 import * as todos from '../todos.json';
-import { UserRegistration } from '../src/models/user-registration';
 
-const userForm: UserRegistration = {
+const userForm: UserRegistrationMdl = {
   email: 'tester@chester.com',
   password: 'PASSWORD',
   lname: 'Tester',
@@ -18,7 +19,7 @@ const userForm: UserRegistration = {
   username: 'testerchester'
 };
 
-const todoForm: Todo = {
+const todoForm: TodoMdl = {
   username: userForm.username,
   private: true,
   title: 'getten it done5153898847',
@@ -35,9 +36,9 @@ const todoForm: Todo = {
   ]
 };
 
-let user: User;
+let user: UserMdl;
 let JWT: string;
-let insertedTodos: Todo[];
+let insertedTodos: TodoMdl[];
 
 beforeAll((done) => {
   done();
@@ -148,7 +149,7 @@ describe('GET /users', () => {
 });
 
 describe('/todo', () => {
-  let todo: Todo;
+  let todo: TodoMdl;
 
   describe('POST /insertmany', () => {
     const route: Route = '/todo/insertmany';

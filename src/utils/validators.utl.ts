@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import * as jwt from 'jsonwebtoken';
-import { User } from '../models/user';
-import { jwtPayload } from './helpers';
+import { UserMdl } from '../models/user.mdl';
+import { jwtPayload } from './helpers.utl';
 import { Dictionary, MappedError } from 'express-validator/shared-typings';
 import { default as TodoService } from '../services/todo.srvc';
 import { check, oneOf, validationResult } from 'express-validator/check';
@@ -81,7 +81,7 @@ export async function validateSameUser (req: Request) {
   if (todo && todo.user_id !== jwtPayload(req).user_id) {
     return {msg: 'Client needs to own this todo for this operation', code: 401};
   } else if (!todo) {
-    return {msg: 'Todo not found in system', code: 404};
+    return {msg: 'TodoMdl not found in system', code: 404};
   } else {
     return false;
   }
@@ -92,7 +92,7 @@ export async function validateDifferentUser (req: Request) {
   if (todo && todo.user_id === jwtPayload(req).user_id) {
     return {msg: 'Client cannot own this todo for this operation', code: 401};
   } else if (!todo) {
-    return {msg: 'Todo not found in system', code: 404};
+    return {msg: 'TodoMdl not found in system', code: 404};
   } else {
     return false;
   }
