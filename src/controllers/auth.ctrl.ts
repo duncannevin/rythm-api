@@ -6,8 +6,41 @@ import { default as UserService } from '../services/user.srvc';
 import { validateLogin, validateRegister } from '../utils/validators.utl';
 import { activationExpiration, activationTokenGen } from '../utils/helpers.utl';
 import { authLogger } from '../utils/loggers.utl';
+import { Email, Username } from '../types/general-types';
 
 class AuthController {
+  async emailExistsCheck(req: Request, resp: Response) {
+    try {
+      const possibleEmail: Email = req.params.email;
+      const maybeUser: UserMdl = await UserService.findByEmail(possibleEmail);
+      resp.status(200).send({
+        exists: !!maybeUser
+      });
+    } catch (error) {
+      authLogger.debug('email exists check error', error);
+      return resp.status(400).send({
+        msg: error,
+        code: 400
+      });
+    }
+  }
+
+  async usernameExistsCheck(req: Request, resp: Response) {
+    try {
+      const possibleUsername: Username = req.params.username;
+      const maybeUser: UserMdl = await UserService.findByUsername(possibleUsername);
+      resp.status(200).send({
+        exists: !!maybeUser
+      });
+    } catch (error) {
+      authLogger.debug('email exists check error', error);
+      return resp.status(400).send({
+        msg: error,
+        code: 400
+      });
+    }
+  }
+
   async login(req: Request, resp: Response) {
     const validationErrors = validateLogin(req);
     if (validationErrors) {
@@ -116,6 +149,7 @@ class AuthController {
       const token = jwt.sign({
         email: user.email,
         role: user.role,
+        profile: user.profile,
         username: user.username,
         user_id: user.user_id
       }, process.env.JWT_SECRET, {expiresIn: '1h'});

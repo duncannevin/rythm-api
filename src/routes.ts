@@ -8,6 +8,8 @@ const AuthRouter = Router();
 AuthRouter.post('/login', AuthController.login);
 AuthRouter.post('/register', AuthController.register);
 AuthRouter.get('/activate/:activationToken', AuthController.activate);
+AuthRouter.get('/exists/username/:username', AuthController.usernameExistsCheck);
+AuthRouter.get('/exists/email/:email', AuthController.emailExistsCheck);
 AuthRouter.get('/linkedin', SocialAuthController.authenticate('linkedin', {session: false}), AuthController.activate);
 AuthRouter.get('/linkedin/callback', SocialAuthController.authenticate('linkedin'), AuthController.activate);
 AuthRouter.get('/github', SocialAuthController.authenticate('github', {session: false}));

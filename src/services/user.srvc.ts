@@ -2,7 +2,7 @@ import { UserMdl } from '../models/user.mdl';
 import * as bcrypt from 'bcrypt-nodejs';
 import * as util from 'util';
 import UserRepository, { UserType } from '../schemas/user.schema';
-import { TodoId, UserId } from '../types/general-types';
+import { TodoId, UserId, Username } from '../types/general-types';
 
 /**
  * @class UserService
@@ -24,6 +24,11 @@ class UserService {
    */
   async findByEmail(email): Promise<UserMdl> {
     const user: UserType = await UserRepository.findOne({email: email});
+    return user;
+  }
+
+  async findByUsername(username: Username): Promise<UserMdl> {
+    const user: UserType = await UserRepository.findOne({username: username});
     return user;
   }
 

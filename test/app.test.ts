@@ -148,6 +148,52 @@ describe('GET /users', () => {
   });
 });
 
+describe('GET /auth/exists/username', () => {
+  const route: Route = '/auth/exists/username';
+  it('should return 200 with exists field false if username not exists', (done) => {
+    request(app).get(`${route}/notarealuser`)
+      .then((res) => {
+        expect(res.status).toEqual(200);
+        expect(typeof res.body.exists).toBe('boolean');
+        expect(res.body.exists).toEqual(false);
+        done();
+      });
+  });
+
+  it('should return 200 with exists field true if username exists', (done) => {
+    request(app).get(`${route}/${user.username}`)
+      .then((res) => {
+        expect(res.status).toEqual(200);
+        expect(typeof res.body.exists).toBe('boolean');
+        expect(res.body.exists).toEqual(true);
+        done();
+      });
+  });
+});
+
+describe('GET /auth/exists/email', () => {
+  const route: Route = '/auth/exists/email';
+  it('should return 200 with exists field false if email not exists', (done) => {
+    request(app).get(`${route}/notarealuser@none.com`)
+      .then((res) => {
+        expect(res.status).toEqual(200);
+        expect(typeof res.body.exists).toBe('boolean');
+        expect(res.body.exists).toEqual(false);
+        done();
+      });
+  });
+
+  it('should return 200 with exists field true if email exists', (done) => {
+    request(app).get(`${route}/${user.email}`)
+      .then((res) => {
+        expect(res.status).toEqual(200);
+        expect(typeof res.body.exists).toBe('boolean');
+        expect(res.body.exists).toEqual(true);
+        done();
+      });
+  });
+});
+
 describe('/todo', () => {
   let todo: TodoMdl;
 
