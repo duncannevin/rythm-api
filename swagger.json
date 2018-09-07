@@ -605,6 +605,62 @@
         }
       }
     },
+    "/auth/exists/email/{EMAIL}": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Checks if email exists in database",
+        "description": "Used for form validation",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "exists": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/exists/{USERNAME}": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Checks if username exists in database",
+        "description": "Used for form validation",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UnAuthorized",
+            "schema": {
+              "$ref": "#/definitions/UnAuthorized"
+            }
+          }
+        }
+      }
+    },
     "/users": {
       "get": {
         "tags": [
