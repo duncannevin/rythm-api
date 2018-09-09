@@ -630,7 +630,7 @@
         }
       }
     },
-    "/auth/exists/{USERNAME}": {
+    "/auth/exists/username/{USERNAME}": {
       "get": {
         "tags": [
           "Auth"

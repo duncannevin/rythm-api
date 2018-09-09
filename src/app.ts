@@ -17,6 +17,7 @@ import * as log4js from 'log4js';
 import * as passport from 'passport';
 import * as favicon from 'serve-favicon';
 import * as path from 'path';
+import * as cors from 'cors';
 
 const MongoStore = mongo(session);
 
@@ -61,6 +62,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(favicon(path.join(__dirname, '../static', 'icon.png')));
+app.use(cors());
 
 app.use(expressJwt({
     secret: process.env.JWT_SECRET,
