@@ -73,6 +73,15 @@ TodoSchema.index({
 
 TodoSchema.pre('save', function save (next) {
   const todo: TodoMdl = this;
+  addId(todo);
+  next();
+});
+
+type TodoType = TodoMdl & mongoose.Document;
+const TodoRepository = mongoose.model<TodoType>('TodoMdl', TodoSchema);
+export default TodoRepository;
+
+function addId (todo: TodoMdl): void {
   if (!todo.hasOwnProperty('todo_id')) {
     const todoId = uniqId('todo-');
     todo.todo_id = todoId;
@@ -87,10 +96,4 @@ TodoSchema.pre('save', function save (next) {
   if (!todo.hasOwnProperty('thumbs_down')) {
     todo.thumbs_down = 0;
   }
-
-  next();
-});
-
-type TodoType = TodoMdl & mongoose.Document;
-const TodoRepository = mongoose.model<TodoType>('TodoMdl', TodoSchema);
-export default TodoRepository;
+}

@@ -37,3 +37,4 @@ dist/**/*
 coverage
 
 src/config/keys.conf.ts
+logs/**.log

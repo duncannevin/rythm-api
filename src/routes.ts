@@ -1,37 +1,54 @@
 import { Router } from 'express';
-import AuthController from './controllers/auth.ctrl';
-import UserController from './controllers/user.ctrl';
-import TodoController from './controllers/todo.ctrl';
-import SocialAuthController from './auth/config.auth';
+import { autoInjectable, inject } from 'tsyringe';
 
-const AuthRouter = Router();
-AuthRouter.post('/login', AuthController.login);
-AuthRouter.post('/register', AuthController.register);
-AuthRouter.get('/activate/:activationToken', AuthController.activate);
-AuthRouter.get('/exists/username/:username', AuthController.usernameExistsCheck);
-AuthRouter.get('/exists/email/:email', AuthController.emailExistsCheck);
-AuthRouter.get('/linkedin', SocialAuthController.authenticate('linkedin', {session: false}), AuthController.activate);
-AuthRouter.get('/linkedin/callback', SocialAuthController.authenticate('linkedin'), AuthController.activate);
-AuthRouter.get('/github', SocialAuthController.authenticate('github', {session: false}));
-AuthRouter.get('/github/callback', SocialAuthController.authenticate('github'), AuthController.activate);
-AuthRouter.get('/twitter', SocialAuthController.authenticate('twitter', {scope: 'email', session: false}));
-AuthRouter.get('/twitter/callback', SocialAuthController.authenticate('twitter'), AuthController.activate);
-AuthRouter.get('/google', SocialAuthController.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login', 'https://www.googleapis.com/auth/plus.profile.emails.read'], session: false }));
-AuthRouter.get('/google/callback', SocialAuthController.authenticate('google'), AuthController.activate);
+import { AuthController } from './controllers/auth.ctrl';
+import { UserController } from './controllers/user.ctrl';
+import { TodoController } from './controllers/todo.ctrl';
+import { SocialAuthController } from './controllers/social-auth.ctrl';
+import { PassportStatic } from 'passport';
 
-const UserRouter = Router();
-UserRouter.get('/', UserController.getAll);
-UserRouter.get('/:userId', UserController.getUser);
+@autoInjectable()
+export class RRouter {
+  authRouter: Router = Router();
+  userRouter: Router = Router();
+  todoRouter: Router = Router();
+  swaggerRouter: Router = Router();
 
-const TodoRouter = Router();
-TodoRouter.post('/insert', TodoController.insertTodo);
-TodoRouter.post('/insertmany', TodoController.insertMany);
-TodoRouter.get('/query', TodoController.getTodos);
-TodoRouter.put('/edit', TodoController.editTodo);
-TodoRouter.delete('/remove', TodoController.deleteTodo);
-TodoRouter.put('/thumbs', TodoController.thumbs);
-TodoRouter.post('/comment', TodoController.comment);
+  constructor (
+    private socialAuthController?: SocialAuthController,
+    private authController?: AuthController,
+    private userController?: UserController,
+    private todoController?: TodoController
+  ) {
+    this._initialize();
+  }
 
-const SwaggerAPIRouter = Router();
+  _initialize (): void {
+    this.authRouter.post('/login', this.authController.login);
+    this.authRouter.post('/register', this.authController.register);
+    this.authRouter.get('/activate/:activationToken', this.authController.activate);
+    this.authRouter.get('/exists/username/:username', this.authController.usernameExistsCheck);
+    this.authRouter.get('/exists/email/:email', this.authController.emailExistsCheck);
+    this.authRouter.get('/linkedin', this.socialAuthController.authenticate('linkedin', {session: false}), this.authController.activate);
+    this.authRouter.get('/linkedin/callback', this.socialAuthController.authenticate('linkedin'), this.authController.activate);
+    this.authRouter.get('/github', this.socialAuthController.authenticate('github', {session: false}));
+    this.authRouter.get('/github/callback', this.socialAuthController.authenticate('github'), this.authController.activate);
+    this.authRouter.get('/twitter', this.socialAuthController.authenticate('twitter', {scope: 'email', session: false}));
+    this.authRouter.get('/twitter/callback', this.socialAuthController.authenticate('twitter'), this.authController.activate);
+    this.authRouter.get('/google', this.socialAuthController.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login', 'https://www.googleapis.com/auth/plus.profile.emails.read'], session: false }));
+    this.authRouter.get('/google/callback', this.socialAuthController.authenticate('google'), this.authController.activate);
 
-export {AuthRouter, UserRouter, TodoRouter, SwaggerAPIRouter};
+    this.userRouter.get('/', this.userController.getAll);
+    this.todoRouter.get('/:userId', this.userController.getUser);
+
+    this.todoRouter.post('/insert', this.todoController.insertTodo);
+    this.todoRouter.post('/insertmany', this.todoController.insertMany);
+    this.todoRouter.get('/query', this.todoController.getTodos);
+    this.todoRouter.put('/edit', this.todoController.editTodo);
+    this.todoRouter.delete('/remove', this.todoController.deleteTodo);
+    this.todoRouter.put('/thumbs', this.todoController.thumbs);
+    this.todoRouter.post('/comment', this.todoController.comment);
+
+    this.swaggerRouter = Router();
+  }
+}

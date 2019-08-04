@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+import './di.handler';
 import * as express from 'express';
 import * as compression from 'compression';  // compresses requests
 import * as session from 'express-session';
@@ -12,7 +14,7 @@ import * as bluebird from 'bluebird';
 import * as expressJwt from 'express-jwt';
 import * as swaggerUI from 'swagger-ui-express';
 import * as swaggerDocument from '../swagger.json';
-import { AuthRouter, TodoRouter, UserRouter, SwaggerAPIRouter } from './routes';
+import { RRouter } from './routes';
 import * as log4js from 'log4js';
 import * as passport from 'passport';
 import * as favicon from 'serve-favicon';
@@ -38,6 +40,8 @@ mongoose.connect(mongoUrl, {useMongoClient: true})
     console.log('MongoDB connection error. Please make sure MongoDB is running. ' + err);
     // process.exit();
   });
+
+
 
 // Express configuration
 app.use(log4js.connectLogger(log4js.getLogger('http'), { level: 'auto' }));
@@ -87,15 +91,16 @@ app.use(function (err, req, res, next) {
 });
 
 // express routes
-app.use('/auth', AuthRouter);
-app.use('/users', UserRouter);
-app.use('/todo', TodoRouter);
+const router = new RRouter();
+app.use('/auth', router.authRouter);
+app.use('/users', router.userRouter);
+app.use('/todo', router.todoRouter);
 
 /**
  * Add swagger endpoints
  */
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
-app.use('/api/v1', SwaggerAPIRouter);
+app.use('/api/v1', router.swaggerRouter);
 
 app.use((req: express.Request, resp: express.Response) => {
   resp.status(404).send({

@@ -3,11 +3,21 @@ import * as bcrypt from 'bcrypt-nodejs';
 import * as util from 'util';
 import UserRepository, { UserType } from '../schemas/user.schema';
 import { TodoId, UserId, Username } from '../types/general-types';
+import { UserServiceType } from '../types/user-service.type';
+import { singleton } from 'tsyringe';
+import { Model } from 'mongoose';
 
 /**
  * @class UserService
  */
-class UserService {
+@singleton()
+export class UserService implements UserServiceType {
+  repository: Model<UserType>;
+
+  constructor (repository: Model<UserType> = UserRepository) {
+    this.repository = repository;
+  }
+
   /**
    * @description Finds user by id
    * @param id
@@ -143,5 +153,3 @@ class UserService {
     return qCompare(candidatePassword, storedPassword);
   }
 }
-
-export default new UserService();

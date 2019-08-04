@@ -1,34 +1,44 @@
 import { Request, Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
 import * as nodemailer from 'nodemailer';
+import { inject, autoInjectable, singleton } from 'tsyringe';
+
 import { UserMdl } from '../models/user.mdl';
-import { default as UserService } from '../services/user.srvc';
-import { validateLogin, validateRegister } from '../utils/validators.utl';
+import { UserService } from '../services/user.srvc';
+import { Validators } from '../utils/validators.utl';
 import { activationExpiration, activationTokenGen } from '../utils/helpers.utl';
 import { authLogger } from '../utils/loggers.utl';
 import { Email, Username } from '../types/general-types';
+import { AuthControllerType } from 'auth-ctrl.type';
 
-class AuthController {
-  async emailExistsCheck(req: Request, resp: Response) {
+@singleton()
+@autoInjectable()
+export class AuthController implements AuthControllerType {
+  constructor (
+    @inject('UserServiceType') private userService?: UserService,
+    @inject('ValidatorsType') private validators?: Validators,
+  ) {}
+
+  async emailExistsCheck(req: Request, resp: Response): Promise<any> {
     try {
       const possibleEmail: Email = req.params.email;
-      const maybeUser: UserMdl = await UserService.findByEmail(possibleEmail);
+      const maybeUser: UserMdl = await this.userService.findByEmail(possibleEmail);
       resp.status(200).send({
         exists: !!maybeUser
       });
     } catch (error) {
       authLogger.debug('email exists check error', error);
-      return resp.status(400).send({
+      resp.status(400).send({
         msg: error,
         code: 400
       });
     }
   }
 
-  async usernameExistsCheck(req: Request, resp: Response) {
+  async usernameExistsCheck(req: Request, resp: Response): Promise<any> {
     try {
       const possibleUsername: Username = req.params.username;
-      const maybeUser: UserMdl = await UserService.findByUsername(possibleUsername);
+      const maybeUser: UserMdl = await this.userService.findByUsername(possibleUsername);
       resp.status(200).send({
         exists: !!maybeUser
       });
@@ -41,8 +51,8 @@ class AuthController {
     }
   }
 
-  async login(req: Request, resp: Response) {
-    const validationErrors = validateLogin(req);
+  async login(req: Request, resp: Response): Promise<any> {
+    const validationErrors = this.validators.validateLogin(req);
     if (validationErrors) {
       authLogger.debug('login validation errors', validationErrors);
       return resp.status(401).send({
@@ -51,7 +61,7 @@ class AuthController {
       });
     }
     try {
-      const user: UserMdl = await UserService.findByEmail(req.body.email);
+      const user: UserMdl = await this.userService.findByEmail(req.body.email);
       if (!user) {
         authLogger.debug('login user does not exist');
         return resp.status(404).send({
@@ -59,7 +69,7 @@ class AuthController {
           code: 404
         });
       }
-      const isSamePass = await UserService.comparePassword(req.body.password, user.password);
+      const isSamePass = await this.userService.comparePassword(req.body.password, user.password);
       if (isSamePass) {
         const token = jwt.sign({
           email: user.email,
@@ -85,8 +95,8 @@ class AuthController {
     }
   }
 
-  async register(req: Request, res: Response, _next: NextFunction) {
-    const validationErrors = validateRegister(req);
+  async register(req: Request, res: Response): Promise<any> {
+    const validationErrors = this.validators.validateRegister(req);
 
     if (validationErrors) {
       authLogger.debug('register validation errors', validationErrors);
@@ -98,7 +108,7 @@ class AuthController {
     const user: UserMdl = req.body;
     try {
       // Check if user already exists
-      const existingUser = await UserService.findByUsernameOrEmail(user.username, user.email);
+      const existingUser = await this.userService.findByUsernameOrEmail(user.username, user.email);
       if (existingUser) {
         authLogger.debug('register user already exists', existingUser.user_id);
         return res.status(409).send({
@@ -130,7 +140,7 @@ class AuthController {
       };
       await transporter.sendMail(mailOptions);
       authLogger.info('register email sent');
-      const savedUser: UserMdl = await UserService.save(user);
+      const savedUser: UserMdl = await this.userService.save(user);
       authLogger.info('register successful');
       res.status(201).send(savedUser);
     } catch (error) {
@@ -142,10 +152,10 @@ class AuthController {
     }
   }
 
-  async activate(req: Request, res: Response) {
+  async activate(req: Request, res: Response): Promise<any> {
     try {
       const activationToken = req.user ? req.user.activationToken : req.params.activationToken;
-      const user: UserMdl = await UserService.activateUser(activationToken);
+      const user: UserMdl = await this.userService.activateUser(activationToken);
       const token = jwt.sign({
         email: user.email,
         role: user.role,
@@ -164,5 +174,3 @@ class AuthController {
     }
   }
 }
-
-export default new AuthController();

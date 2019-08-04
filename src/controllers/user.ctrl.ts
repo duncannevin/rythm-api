@@ -1,12 +1,19 @@
 import { Request, Response } from 'express';
-import { default as UserService } from '../services/user.srvc';
+import { inject, autoInjectable, singleton } from 'tsyringe';
+
+import { UserService } from '../services/user.srvc';
 import { userLogger } from '../utils/loggers.utl';
 
-class UserController {
+@singleton()
+@autoInjectable()
+export class UserController {
+  constructor (
+    @inject('UserServiceType') private userService?: UserService
+  ) {}
 
   async getAll(req: Request, resp: Response) {
     try {
-      const users = await UserService.findAll();
+      const users = await this.userService.findAll();
       userLogger.info('getAll successful');
       resp.status(200).send(users);
     } catch (error) {
@@ -20,7 +27,7 @@ class UserController {
 
   async getUser(req: Request, resp: Response) {
     try {
-      const user = await UserService.findByUserId(req.params.userId);
+      const user = await this.userService.findByUserId(req.params.userId);
       userLogger.info('getUser successful');
       resp.status(200).send(user);
     } catch (error) {
@@ -32,5 +39,3 @@ class UserController {
     }
   }
 }
-
-export default new UserController();

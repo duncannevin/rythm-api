@@ -1,22 +1,26 @@
 import { Request, Response } from 'express';
-import { default as TodoService } from '../services/todo.srvc';
-import { default as UserService } from '../services/user.srvc';
-import {
-  validateComment,
-  validateDelete, validateDifferentUser, validateEditTodo, validateIncrementThumbs,
-  validateInsertTodo,
-  validateInsertTodos,
-  validateSameUser,
-  validateTodoQuery
-} from '../utils/validators.utl';
+import { inject, autoInjectable, singleton } from 'tsyringe';
+
+import { TodoService } from '../services/todo.srvc';
+import { UserService } from '../services/user.srvc';
+import { Validators } from '../utils/validators.utl';
 import * as omit from 'object.omit';
 import { TodoId, UserId } from '../types/general-types';
 import { jwtPayload } from '../utils/helpers.utl';
 import { todoLogger } from '../utils/loggers.utl';
+import { TodoControllerType } from 'todo-ctrl.type';
 
-class TodoController {
-  async insertTodo (req: Request, resp: Response) {
-    const validationErrors = validateInsertTodo(req);
+@singleton()
+@autoInjectable()
+export class TodoController implements TodoControllerType {
+  constructor (
+    @inject('TodoServiceType') private todoService?: TodoService,
+    @inject('UserServiceType') private userService?: UserService,
+    @inject('ValidatorsType') private validators?: Validators
+  ) {}
+
+  async insertTodo (req: Request, resp: Response): Promise<any> {
+    const validationErrors = this.validators.validateInsertTodo(req);
 
     if (validationErrors) {
       todoLogger.debug('insertTodo validation error', validationErrors);
@@ -27,7 +31,7 @@ class TodoController {
     }
 
     try {
-      const todo = await TodoService.save(req.body);
+      const todo = await this.todoService.save(req.body);
 
       if (!todo) {
         todoLogger.debug('insertTodo failed to insert todo');
@@ -47,8 +51,8 @@ class TodoController {
     }
   }
 
-  async getTodos (req: Request, resp: Response) {
-    const validationErrors = validateTodoQuery(req);
+  async getTodos (req: Request, resp: Response): Promise<any> {
+    const validationErrors = this.validators.validateTodoQuery(req);
 
     if (validationErrors) {
       todoLogger.debug('getTodos validation error', validationErrors);
@@ -62,9 +66,9 @@ class TodoController {
       const query = req.query;
       let todos;
       if (query.hasOwnProperty('search')) {
-        todos = await TodoService.searchRepository(query.search, omit(query, 'search'));
+        todos = await this.todoService.searchRepository(query.search, omit(query, 'search'));
       } else {
-        todos = await TodoService.queryRepository(query);
+        todos = await this.todoService.queryRepository(query);
       }
       todoLogger.info('getTodos success');
       return resp.status(200).send(todos);
@@ -77,8 +81,8 @@ class TodoController {
     }
   }
 
-  async insertMany (req: Request, resp: Response) {
-    const validationErrors = validateInsertTodos(req);
+  async insertMany (req: Request, resp: Response): Promise<any> {
+    const validationErrors = this.validators.validateInsertTodos(req);
 
     if (validationErrors) {
       todoLogger.debug('insertMany validation error', validationErrors);
@@ -89,7 +93,7 @@ class TodoController {
     }
 
     try {
-      const todos = await TodoService.insertMany(req.body.todos);
+      const todos = await this.todoService.insertMany(req.body.todos);
       todoLogger.info('insertMany success');
       return resp.status(201).send(todos);
     } catch (error) {
@@ -101,8 +105,8 @@ class TodoController {
     }
   }
 
-  async editTodo (req: Request, resp: Response) {
-    const validationErrors = validateEditTodo(req);
+  async editTodo (req: Request, resp: Response): Promise<any> {
+    const validationErrors = this.validators.validateEditTodo(req);
 
     if (validationErrors) {
       todoLogger.debug('editTodo validation error', validationErrors);
@@ -113,13 +117,13 @@ class TodoController {
     }
 
     try {
-      const sameUserError = await validateSameUser(req);
+      const sameUserError = await this.validators.validateSameUser(req);
       if (sameUserError) {
         todoLogger.debug('editTodo same user error', sameUserError);
         return resp.status(sameUserError.code).send(sameUserError);
       }
 
-      const todo = await TodoService.updateOne(req.body);
+      const todo = await this.todoService.updateOne(req.body);
       todoLogger.info('editTodd successful');
       return resp.status(200).send(todo);
     } catch (error) {
@@ -131,8 +135,8 @@ class TodoController {
     }
   }
 
-  async thumbs (req: Request, resp: Response) {
-    const validationErrors = validateIncrementThumbs(req);
+  async thumbs (req: Request, resp: Response): Promise<any> {
+    const validationErrors = this.validators.validateIncrementThumbs(req);
 
     if (validationErrors) {
       todoLogger.debug('thumbs validation error', validationErrors);
@@ -143,7 +147,7 @@ class TodoController {
     }
 
     try {
-      const differentUserError = await validateDifferentUser(req);
+      const differentUserError = await this.validators.validateDifferentUser(req);
       if (differentUserError) {
         todoLogger.debug('thumbs different user error', differentUserError);
         return resp.status(differentUserError.code).send(differentUserError);
@@ -153,31 +157,31 @@ class TodoController {
       const raterId: UserId = jwtPayload(req).user_id;
       const thumb = req.body.thumb;
 
-      const rater = await UserService.findByUserId(raterId);
+      const rater = await this.userService.findByUserId(raterId);
       let todo;
       if (rater.liked.includes(todoId) && thumb === 'thumbUp') {
-        await UserService.removeLiked(raterId, todoId);
-        todo = await TodoService.decrementThumbUp(todoId);
+        await this.userService.removeLiked(raterId, todoId);
+        todo = await this.todoService.decrementThumbUp(todoId);
       } else if (rater.notLiked.includes(todoId) && thumb === 'thumbDown') {
-        await UserService.removeNotLiked(raterId, todoId);
-        todo = await TodoService.decrementThumbDown(todoId);
+        await this.userService.removeNotLiked(raterId, todoId);
+        todo = await this.todoService.decrementThumbDown(todoId);
       } else if (rater.liked.includes(todoId) && thumb === 'thumbDown') {
-        await UserService.removeLiked(raterId, todoId);
-        await UserService.addNotLiked(raterId, todoId);
-        await TodoService.decrementThumbUp(todoId);
-        todo = await TodoService.thumbDown(todoId);
+        await this.userService.removeLiked(raterId, todoId);
+        await this.userService.addNotLiked(raterId, todoId);
+        await this.todoService.decrementThumbUp(todoId);
+        todo = await this.todoService.thumbDown(todoId);
       } else if (rater.notLiked.includes(todoId) && thumb === 'thumbUp') {
-        await UserService.removeNotLiked(raterId, todoId);
-        await UserService.addLiked(raterId, todoId);
-        await TodoService.decrementThumbDown(todoId);
-        todo = await TodoService.thumbUp(todoId);
+        await this.userService.removeNotLiked(raterId, todoId);
+        await this.userService.addLiked(raterId, todoId);
+        await this.todoService.decrementThumbDown(todoId);
+        todo = await this.todoService.thumbUp(todoId);
       } else {
         if (thumb === 'thumbUp') {
-          await UserService.addLiked(raterId, todoId);
+          await this.userService.addLiked(raterId, todoId);
         } else {
-          await UserService.addNotLiked(raterId, todoId);
+          await this.userService.addNotLiked(raterId, todoId);
         }
-        todo = await TodoService[thumb](todoId);
+        todo = await this.todoService[thumb](todoId);
       }
       todoLogger.info('thumbs successful');
       return resp.status(200).send(todo);
@@ -190,8 +194,8 @@ class TodoController {
     }
   }
 
-  async comment (req: Request, resp: Response) {
-    const validationErrors = validateComment(req);
+  async comment (req: Request, resp: Response): Promise<any> {
+    const validationErrors = this.validators.validateComment(req);
 
     if (validationErrors) {
       todoLogger.debug('comment validation error', validationErrors);
@@ -202,7 +206,7 @@ class TodoController {
     }
 
     try {
-      const todo = await TodoService.insertComment(req.body.todo_id, omit(req.body, 'todo_id'));
+      const todo = await this.todoService.insertComment(req.body.todo_id, omit(req.body, 'todo_id'));
       todoLogger.info('comment successful');
       return resp.status(200).send(todo);
     } catch (error) {
@@ -214,8 +218,8 @@ class TodoController {
     }
   }
 
-  async deleteTodo (req: Request, resp: Response) {
-    const validationErrors = validateDelete(req);
+  async deleteTodo (req: Request, resp: Response): Promise<any> {
+    const validationErrors = this.validators.validateDelete(req);
 
     if (validationErrors) {
       todoLogger.debug('deleteTodo validation error', validationErrors);
@@ -226,13 +230,13 @@ class TodoController {
     }
 
     try {
-      const sameUserError = await validateSameUser(req);
+      const sameUserError = await this.validators.validateSameUser(req);
       if (sameUserError) {
         todoLogger.debug('deleteTodo same user error', sameUserError);
         return resp.status(sameUserError.code).send(sameUserError);
       }
 
-      await TodoService.deleteOne(req.body.todo_id);
+      await this.todoService.deleteOne(req.body.todo_id);
       todoLogger.info('deleteTodo successful');
       return resp.status(204).send();
     } catch (error) {
@@ -244,5 +248,3 @@ class TodoController {
     }
   }
 }
-
-export default new TodoController();

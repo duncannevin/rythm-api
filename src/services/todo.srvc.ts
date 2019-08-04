@@ -1,20 +1,31 @@
 import { TodoMdl } from '../models/todo.mdl';
 import TodoRepository, { TodoType } from '../schemas/todo.schema';
-import { TodoId, UserId, Username } from 'general-types.ts';
+import { TodoId, Username } from 'general-types.ts';
 import { QueryMdl } from '../models/query.mdl';
 import { CommentMdl } from '../models/comment.mdl';
+import { TodoServiceType } from '../types/todo-service.type';
+import { singleton } from 'tsyringe';
+import { Model } from 'mongoose';
+import { UserId } from 'aws-sdk/clients/lexruntime';
 
 /**
- * @class TodoServer
+ * @class TodoService
  */
-class TodoService {
+@singleton()
+export class TodoService implements TodoServiceType {
+  repository: Model<TodoType>;
+
+  constructor (repository: Model<TodoType> = TodoRepository) {
+    this.repository = repository;
+  }
+
   /**
    * @description saves TodoMdl to storage
    * @param {TodoMdl} todo
    * @return {Promise<TodoMdl>}
    */
   async save(todo: TodoMdl): Promise<TodoMdl> {
-    return await new TodoRepository(todo).save();
+    return await new this.repository(todo).save();
   }
 
   /**
@@ -22,7 +33,7 @@ class TodoService {
    * @return {Promise<TodoMdl[]>}
    */
   async fetchAll(): Promise<TodoMdl[]> {
-    return await TodoRepository.find() as TodoMdl[];
+    return await this.repository.find() as TodoMdl[];
   }
 
   /**
@@ -32,7 +43,7 @@ class TodoService {
    * @return {Promise<TodoMdl[]>}
    */
   async searchRepository(searchString: string, query: QueryMdl): Promise<TodoMdl[]> {
-   return await TodoRepository
+   return await this.repository
      .find({$and: [{$text: {$search: searchString}}, query]}, {score: {$meta: 'textScore'}})
      .sort({score: {$meta: 'textScore'}}) as TodoMdl[];
   }
@@ -43,7 +54,7 @@ class TodoService {
    * @return {Promise<TodoMdl[]>}
    */
   async queryRepository(query: QueryMdl): Promise<TodoMdl[]> {
-    return await TodoRepository.find(query) as TodoMdl[];
+    return await this.repository.find(query) as TodoMdl[];
   }
 
   /**
@@ -52,7 +63,8 @@ class TodoService {
    * @return {Promise<TodoMdl>}
    */
   async findOne(todoId: TodoId): Promise<TodoMdl> {
-    return await TodoRepository.findOne({todo_id: todoId}, {'ratings.raters': 0});
+    const todo = await this.repository.find({todo_id: todoId});
+    return todo[0] as TodoMdl;
   }
 
   /**
@@ -61,7 +73,7 @@ class TodoService {
    * @return {Promise<TodoMdl>}
    */
   async thumbUp(todoId: TodoId): Promise<TodoMdl> {
-    return (await TodoRepository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs_up: 1}}, {new: true}));
+    return (await this.repository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs_up: 1}}, {new: true}));
   }
 
   /**
@@ -70,7 +82,7 @@ class TodoService {
    * @return {Promise<TodoMdl>}
    */
   async thumbDown(todoId: TodoId): Promise<TodoMdl> {
-    return (await TodoRepository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs_down: 1}}, {new: true}));
+    return (await this.repository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs_down: 1}}, {new: true}));
   }
 
   /**
@@ -79,7 +91,7 @@ class TodoService {
    * @return {Promise<TodoMdl>}
    */
   async decrementThumbUp(todoId: TodoId): Promise<TodoMdl> {
-    return (await TodoRepository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs_up: -1}}, {new: true}));
+    return (await this.repository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs_up: -1}}, {new: true}));
   }
 
   /**
@@ -88,7 +100,7 @@ class TodoService {
    * @return {Promise<TodoMdl>}
    */
   async decrementThumbDown(todoId: TodoId): Promise<TodoMdl> {
-    return (await TodoRepository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs_down: -1}}, {new: true}));
+    return (await this.repository.findOneAndUpdate({todo_id: todoId}, {$inc: {thumbs_down: -1}}, {new: true}));
   }
 
   /**
@@ -98,7 +110,7 @@ class TodoService {
    */
   async insertComment(todoId: TodoId, comment: CommentMdl): Promise<TodoMdl> {
     comment.date = new Date().toString();
-    return (await TodoRepository.findOneAndUpdate({todo_id: todoId}, {$push: {comments: comment}}, {new: true}));
+    return (await this.repository.findOneAndUpdate({todo_id: todoId}, {$push: {comments: comment}}, {new: true}));
   }
 
   /**
@@ -107,33 +119,31 @@ class TodoService {
    * @return {Promise<void>}
    */
   async insertMany(todos: TodoMdl[]): Promise<TodoMdl[]> {
-    return await TodoRepository.create(todos) as TodoMdl[];
+    return await this.repository.create(todos) as TodoMdl[];
   }
 
   /**
    * @description updates a TodoMdl in storage
    */
   async updateOne(todo: TodoMdl): Promise<TodoMdl> {
-    return (await TodoRepository.findOneAndUpdate({todo_id: todo.todo_id}, {$set: todo}, {new: true}));
+    return (await this.repository.findOneAndUpdate({todo_id: todo.todo_id}, {$set: todo}, {new: true}));
   }
 
   /**
    * @description deletes a single TodoMdl from storage
    */
   async deleteOne(todoId: TodoId): Promise<void> {
-    return await TodoRepository.deleteOne({todo_id: todoId});
+    return await this.repository.deleteOne({todo_id: todoId});
   }
 
   async deleteMany(todoIds: TodoId[]): Promise<void> {
-    return (await TodoRepository.deleteMany({todo_id: {$in: todoIds}}));
+    return (await this.repository.deleteMany({todo_id: {$in: todoIds}}));
   }
 
   /**
    * @description deletes all of a users Todos
    */
-  async deleteUsersTodos(username: Username): Promise<void> {
-    return (await TodoRepository.deleteMany({username: username}));
+  async deleteUsersTodos(userId: UserId): Promise<void> {
+    return (await this.repository.deleteMany({user_id: userId}));
   }
 }
-
-export default new TodoService();
