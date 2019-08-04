@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import * as jwt from 'jsonwebtoken';
 import * as nodemailer from 'nodemailer';
 import { inject, autoInjectable, singleton } from 'tsyringe';
 
@@ -17,7 +16,12 @@ export class AuthController implements AuthControllerType {
   constructor (
     @inject('UserServiceType') private userService?: UserService,
     @inject('ValidatorsType') private validators?: Validators,
-  ) {}
+  ) {
+    this.emailExistsCheck = this.emailExistsCheck.bind(this);
+    this.usernameExistsCheck = this.usernameExistsCheck.bind(this);
+    this.register = this.register.bind(this);
+    this.activate = this.activate.bind(this);
+  }
 
   async emailExistsCheck(req: Request, resp: Response): Promise<any> {
     try {
@@ -51,51 +55,7 @@ export class AuthController implements AuthControllerType {
     }
   }
 
-  async login(req: Request, resp: Response): Promise<any> {
-    const validationErrors = this.validators.validateLogin(req);
-    if (validationErrors) {
-      authLogger.debug('login validation errors', validationErrors);
-      return resp.status(401).send({
-        msg: validationErrors,
-        code: 406
-      });
-    }
-    try {
-      const user: UserMdl = await this.userService.findByEmail(req.body.email);
-      if (!user) {
-        authLogger.debug('login user does not exist');
-        return resp.status(404).send({
-          msg: 'User not found',
-          code: 404
-        });
-      }
-      const isSamePass = await this.userService.comparePassword(req.body.password, user.password);
-      if (isSamePass) {
-        const token = jwt.sign({
-          email: user.email,
-          role: user.role,
-          username: user.username,
-          user_id: user.user_id
-        }, process.env.JWT_SECRET, {expiresIn: '1h'});
-        authLogger.info('login successful');
-        return resp.status(200).send({token: token});
-      } else {
-        authLogger.debug('login unauthorized');
-        return resp.status(401).send({
-          msg: 'Unauthorized',
-          status: 401
-        });
-      }
-    } catch (error) {
-      authLogger.debug('login failed', error);
-      return resp.status(400).send({
-        msg: error,
-        code: 400
-      });
-    }
-  }
-
-  async register(req: Request, res: Response): Promise<any> {
+  async register(req: Request, res: Response, next: NextFunction): Promise<any> {
     const validationErrors = this.validators.validateRegister(req);
 
     if (validationErrors) {
@@ -116,37 +76,13 @@ export class AuthController implements AuthControllerType {
           status: 409
         });
       }
-      // Generate activation token
-      user.activationToken = await activationTokenGen();
-      user.activationExpires = activationExpiration(); // does nothing at this point (not sure I will ever implement)
-      // Send activation email
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: Number(process.env.SMPT_PORT),
-        logger: true,
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASSWORD
-        }
-      });
-      const mailOptions = {
-        to: user.email,
-        from: process.env.SMTP_USER,
-        subject: 'Rythm account activation',
-        text: `You are receiving this email because you (or someone else) have requested account activation with Rythm.\n\n
-          Please click on the following link, or paste this into your browser to complete the process:\n\n
-          http://${req.headers.host}/auth/activate/${user.activationToken}\n\n
-          If you did not request this, please ignore this email\n`
-      };
-      await transporter.sendMail(mailOptions);
-      authLogger.info('register email sent');
-      const savedUser: UserMdl = await this.userService.save(user);
+      req.user = await this.userService.save(user);
       authLogger.info('register successful');
-      res.status(201).send(savedUser);
+      next();
     } catch (error) {
       authLogger.debug('register failed', error);
       res.status(400).send({
-        msg: 'Unable to send email',
+        msg: 'Failed to register',
         status: 400
       });
     }
@@ -154,17 +90,9 @@ export class AuthController implements AuthControllerType {
 
   async activate(req: Request, res: Response): Promise<any> {
     try {
-      const activationToken = req.user ? req.user.activationToken : req.params.activationToken;
-      const user: UserMdl = await this.userService.activateUser(activationToken);
-      const token = jwt.sign({
-        email: user.email,
-        role: user.role,
-        profile: user.profile,
-        username: user.username,
-        user_id: user.user_id
-      }, process.env.JWT_SECRET, {expiresIn: '1h'});
+      const user = req.user;
       authLogger.info('activate successful');
-      return res.status(200).send({token: token});
+      return res.status(200).send(user.toAuthJSON());
     } catch (error) {
       authLogger.debug('activate failed', error);
       res.status(400).send({

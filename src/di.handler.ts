@@ -8,7 +8,7 @@ import { UserController } from './controllers/user.ctrl';
 import { AuthController } from './controllers/auth.ctrl'; 
 import { RRouter } from './routes';
 import { Validators } from './utils/validators.utl';
-import { SocialAuthController } from './controllers/social-auth.ctrl';
+import { PassportControl } from './controllers/passport.ctrl';
 
 container
   .register('TodoServiceType', {
@@ -26,5 +26,5 @@ container
 const todoCtrl = container.resolve(TodoController);
 const userCtrl = container.resolve(UserController);
 const authCtrl = container.resolve(AuthController);
-const socialAuthCtrl = container.resolve(SocialAuthController);
+const socialAuthCtrl = container.resolve(PassportControl);
 const rrouter = container.resolve(RRouter);

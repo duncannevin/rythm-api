@@ -44,13 +44,6 @@ export interface UserServiceType {
   save(user: UserMdl): Promise<UserMdl>
 
   /**
-   * @description Fetches single user by activationToken and sets active flag
-   * @param activationToken
-   * @returns {Promise<UserMdl>}
-   */
-  activateUser(activationToken): Promise<UserMdl>
-
-  /**
    * @description Creates or updates a current user (for social auth)
    * @param {UserMdl} user
    * @return {Promise<UserMdl>}
@@ -96,12 +89,4 @@ export interface UserServiceType {
   findAll(): Promise<UserMdl[]>
 
   deleteOne(username: String): Promise<void>
-
-  /**
-   * @description Compares encrypted and decrypted passwords
-   * @param {string} candidatePassword
-   * @param storedPassword
-   * @returns {boolean}
-   */
-  comparePassword(candidatePassword: string, storedPassword): boolean
 }

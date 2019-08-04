@@ -68,17 +68,9 @@ export class UserService implements UserServiceType {
    * @returns {Promise<UserMdl>}
    */
   async save(user: UserMdl): Promise<UserMdl> {
-    return (await new UserRepository(user).save()).toObject({ virtuals: true });
-  }
-
-  /**
-   * @description Fetches single user by activationToken and sets active flag
-   * @param activationToken
-   * @returns {Promise<UserMdl>}
-   */
-  async activateUser(activationToken): Promise<UserMdl> {
-    const user: UserMdl = await UserRepository.findOneAndUpdate({activationToken: activationToken}, {active: true}, {new: true});
-    return user;
+    const newUser = new UserRepository(user);
+    newUser.setPassword(user.password);
+    return await newUser.save();
   }
 
   /**
@@ -140,16 +132,5 @@ export class UserService implements UserServiceType {
 
   async deleteOne(username: String): Promise<void> {
     return await UserRepository.deleteOne({username: username});
-  }
-
-  /**
-   * @description Compares encrypted and decrypted passwords
-   * @param {string} candidatePassword
-   * @param storedPassword
-   * @returns {boolean}
-   */
-  comparePassword(candidatePassword: string, storedPassword): boolean {
-    const qCompare = (util as any).promisify(bcrypt.compare);
-    return qCompare(candidatePassword, storedPassword);
   }
 }

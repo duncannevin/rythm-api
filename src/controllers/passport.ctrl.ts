@@ -4,24 +4,31 @@ import * as LinkedInStrategy from 'passport-linkedin-oauth2';
 import * as GitHubStrategy from 'passport-github2';
 import * as TwitterStrategy from 'passport-twitter';
 import * as GoogleStrategy from 'passport-google-oauth2';
-import { injectable, inject, autoInjectable, singleton } from 'tsyringe';
+import * as LocalStrategy from 'passport-local';
+import { inject, autoInjectable, singleton } from 'tsyringe';
 
 import { UserService } from '../services/user.srvc';
 import { linkedin, github, twitter, google } from '../config/keys.conf';
 import { UserMdl } from '../models/user.mdl';
 import { activationExpiration, activationTokenGen } from '../utils/helpers.utl';
 import { authLogger } from '../utils/loggers.utl';
-import { SocialAuthControllerType } from 'social-auth-ctrl.type';
+import { PassportControlType } from 'passport-ctrl.type';
 
 @singleton()
 @autoInjectable()
-export class SocialAuthController implements SocialAuthControllerType {
+export class PassportControl implements PassportControlType {
   passport: PassportStatic;
   authenticate: any; 
 
   constructor (
     @inject('UserServiceType') private userService?: UserService
   ) {
+    this._localAuthCallback = this._localAuthCallback.bind(this);
+    this._oauth1Callback = this._oauth1Callback.bind(this);
+    this._oauth2Callback = this._oauth2Callback.bind(this);
+    this._passportInit = this._passportInit.bind(this);
+    this._initialize = this._initialize.bind(this);
+
     this._passportInit();
     this._initialize();
   }
@@ -51,8 +58,6 @@ export class SocialAuthController implements SocialAuthControllerType {
       role: 'guest'
     };
     try {
-      user.activationToken = await activationTokenGen();
-      user.activationExpires = activationExpiration(); // does nothing at this point (not sure I will ever implement)
       const addedUser = await this.userService.updateOrCreate(user);
       authLogger.info('oauth1 successful', profile.provider);
       done(undefined, addedUser);
@@ -70,8 +75,6 @@ export class SocialAuthController implements SocialAuthControllerType {
       role: 'guest'
     };
     try {
-      user.activationToken = await activationTokenGen();
-      user.activationExpires = activationExpiration(); // does nothing at this point(not sure I will ever implement)
       const addedUser = await this.userService.updateOrCreate(user);
       authLogger.info('oauth2 successful', profile.provider);
       done(undefined, addedUser);
@@ -81,7 +84,28 @@ export class SocialAuthController implements SocialAuthControllerType {
     }
   }
 
+  private async _localAuthCallback (email, password, done) {
+    try {
+      const user = await this.userService.findByEmail(email);
+      if (!user || !user.validatePassword(password)) {
+        return done(null, false, { error: { 'email or passord': 'is invalid' }});
+      }
+      return done(null, user);
+    } catch (error) {
+      authLogger.debug('local auth failed', error);
+      done(error, null);
+    }
+  }
+
   private _initialize(): void {
+    /**
+     * @description Local auth
+     */
+    passport.use(new LocalStrategy({
+      usernameField: 'email',
+      passwordField: 'password'
+    }, this._localAuthCallback));
+
     /**
      * @description Linkedin oauth
      */

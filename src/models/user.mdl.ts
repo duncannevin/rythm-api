@@ -10,6 +10,9 @@ export interface UserMdl {
   user_id?: string;
 
   password?: string;
+
+  hash?: string;
+  salt?: string;
   role?: string;
 
   active?: boolean;
@@ -20,10 +23,12 @@ export interface UserMdl {
   passwordResetToken?: string;
   passwordResetExpires?: Date;
 
-  activationToken?: string;
-  activationExpires?: Date;
-
   tokens?: Array<AuthTokenMdl>;
 
   profile?: ProfileMdl;
+
+  toAuthJSON?: () => any;
+  generateJWT?: () => any;
+  validatePassword?: (candidatePassword: string) => any;
+  setPassword?: (password: string) => void;
 }
