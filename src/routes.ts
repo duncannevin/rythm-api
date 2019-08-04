@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { autoInjectable, inject } from 'tsyringe';
+import { verify } from 'jsonwebtoken';
 
 import { AuthController } from './controllers/auth.ctrl';
 import { UserController } from './controllers/user.ctrl';
@@ -21,10 +22,55 @@ export class RRouter {
     private userController?: UserController,
     private todoController?: TodoController
   ) {
+    this._lockRequired = this._lockRequired.bind(this);
+    this._lockOptional = this._lockOptional.bind(this);
+
     this._initialize();
   }
 
+  private _getToken (req) {
+    const { headers: { authorization } } = req;
+    const name = authorization.split(' ')[0]
+    if (name === 'Token' || name === 'Bearer') {
+      return authorization.split(' ')[1];
+    }
+
+    return null;
+  }
+
+  private _lockRequired (req, res, next) {
+    try {
+      const token = this._getToken(req);
+      if (!token) return res.status(401).send({ msg: 'unauthorized', code: 401 });
+      const secret = process.env.SESSION_SECRET;
+      const decoded = verify(token, secret);
+      req.user = decoded;
+      next();
+    } catch(error) {
+      res.status(401).send({ msg: 'unauthorized', code: 401 });
+    }
+  }
+
+  private _lockOptional (req, res, next) {
+    try {
+      const token = this._getToken(req);
+      const secret = process.env.SESSION_SECRET;
+      const decoded = verify(token, secret);
+      req.user = decoded;
+      next();
+    } catch(error) {
+      next();
+    }
+  }
+
   _initialize (): void {
+    this.authRouter.get('/test', this._lockRequired, (req, res) => {
+      res.send({ usr: req.user });
+    });
+    this.authRouter.get('/test2', this._lockOptional, (req, res) => {
+      res.send({ usr: req.user });
+    });
+
     this.authRouter.post('/register', this.authController.register, this.authController.activate);
     this.authRouter.post('/login', passport.authenticate('local', { session: false }), this.authController.activate);
     this.authRouter.get('/activate/:activationToken', this.authController.activate);
