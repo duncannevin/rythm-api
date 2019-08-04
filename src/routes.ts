@@ -1,13 +1,12 @@
-import { Router } from 'express';
 import { autoInjectable, inject } from 'tsyringe';
 import { verify } from 'jsonwebtoken';
+import { Router, Request, Response, NextFunction } from 'express';
+import * as passport from 'passport';
 
 import { AuthController } from './controllers/auth.ctrl';
 import { UserController } from './controllers/user.ctrl';
 import { TodoController } from './controllers/todo.ctrl';
 import { PassportControl } from './controllers/passport.ctrl';
-import { PassportStatic } from 'passport';
-import passport = require('passport');
 
 @autoInjectable()
 export class RRouter {
@@ -28,8 +27,9 @@ export class RRouter {
     this._initialize();
   }
 
-  private _getToken (req) {
-    const { headers: { authorization } } = req;
+  private _getToken (req: Request): string|null {
+    // @ts-ignore
+    const { header: { authorization } } = req;
     const name = authorization.split(' ')[0]
     if (name === 'Token' || name === 'Bearer') {
       return authorization.split(' ')[1];
@@ -38,20 +38,20 @@ export class RRouter {
     return null;
   }
 
-  private _lockRequired (req, res, next) {
+  private _lockRequired (req: Request, res: Response, next: NextFunction): void {
     try {
       const token = this._getToken(req);
-      if (!token) return res.status(401).send({ msg: 'unauthorized', code: 401 });
+      if (!token) throw new Error('no authorization token found');
       const secret = process.env.SESSION_SECRET;
       const decoded = verify(token, secret);
-      req.user = decoded;
+      req['user'] = decoded;
       next();
     } catch(error) {
       res.status(401).send({ msg: 'unauthorized', code: 401 });
     }
   }
 
-  private _lockOptional (req, res, next) {
+  private _lockOptional (req, res, next): void {
     try {
       const token = this._getToken(req);
       const secret = process.env.SESSION_SECRET;
