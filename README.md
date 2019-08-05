@@ -5,7 +5,6 @@ TodoMdl list collaboration.
 # Pre-reqs
 - Install [Node.js](https://nodejs.org/en/)
 - Install [MongoDB](https://docs.mongodb.com/manual/installation/)
-- Configure your SMTP service and enter your SMTP settings inside `.env.example`
 
 # Swagger
 To access Swagger UI for available endpoints
