@@ -36,7 +36,7 @@ export class TodoController implements TodoControllerType {
       if (!todo) {
         todoLogger.debug('insertTodo failed to insert todo');
         return resp.status(404).send({
-          msg: 'Failed to insert user',
+          msg: 'Failed to insert todo',
           code: 404
         });
       }

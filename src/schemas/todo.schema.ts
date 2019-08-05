@@ -55,7 +55,7 @@ const TodoSchema = new mongoose.Schema({
     ],
     required: true
   },
-}, {timestamps: true});
+}, {timestamps: true, versionKey: false});
 
 TodoSchema.index({
   'username': 'text',

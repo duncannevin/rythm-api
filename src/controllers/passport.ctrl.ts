@@ -54,7 +54,7 @@ export class PassportControl implements PassportControlType {
     const user: UserMdl = {
       display_name: profile.displayName,
       email: profile.emails[0].value,
-      user_id: `${profile.provider}|${profile.id}`,
+      user_id: `${profile.provider}-${profile.id}`,
       role: 'guest'
     };
     try {
@@ -71,7 +71,7 @@ export class PassportControl implements PassportControlType {
     const user: UserMdl = {
       display_name: profile.displayName,
       email: profile.emails[0].value,
-      user_id: `${profile.provider}|${profile.id}`,
+      user_id: `${profile.provider}-${profile.id}`,
       role: 'guest'
     };
     try {

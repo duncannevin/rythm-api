@@ -1,7 +1,6 @@
 import 'reflect-metadata';
 
 import * as mongoose from 'mongoose';
-import { Model } from 'mongoose';
 
 import { TodoService } from '../../src/services/todo.srvc';
 import { mockMongoose } from '../mocks/mock.mongoose';

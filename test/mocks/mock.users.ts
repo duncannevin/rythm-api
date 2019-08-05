@@ -1,4 +1,4 @@
-[
+export const mockUsers = [
   {
     "username": "tesla",
     "email": "nikola@example.com",
@@ -9,7 +9,9 @@
       "fname": "Nikola",
       "lname": "Tesla",
       "info": "The father of our modern technological age"
-    }
+    },
+    "liked": ["1", "2", "3"],
+    "notLiked": ["0", "9", "8"]
   },
   {
     "username": "aaronsw",
@@ -21,6 +23,8 @@
       "fname": "Aaron",
       "lname": "Swartz",
       "info": "Internet's own boy"
-    }
+    },
+    "liked": ["1", "2", "3"],
+    "notLiked": ["0", "9", "8"]
   }
-]
+];

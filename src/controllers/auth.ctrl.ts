@@ -5,7 +5,6 @@ import { inject, autoInjectable, singleton } from 'tsyringe';
 import { UserMdl } from '../models/user.mdl';
 import { UserService } from '../services/user.srvc';
 import { Validators } from '../utils/validators.utl';
-import { activationExpiration, activationTokenGen } from '../utils/helpers.utl';
 import { authLogger } from '../utils/loggers.utl';
 import { Email, Username } from '../types/general-types';
 import { AuthControllerType } from 'auth-ctrl.type';

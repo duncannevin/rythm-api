@@ -4,6 +4,7 @@ import { TodoId } from '../types/general-types';
 
 export interface UserMdl {
 
+  _id?: string;
   email?: string;
   username?: string;
   display_name?: string;
