@@ -20,11 +20,6 @@
             "single",
             "avoid-escape"
         ],
-        "semicolon": [
-            true,
-            "always",
-            "ignore-interfaces"
-        ],
         "whitespace": [
             true,
             "check-branch",

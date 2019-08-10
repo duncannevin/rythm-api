@@ -91,7 +91,10 @@ export class AuthController implements AuthControllerType {
     try {
       const user = req.user;
       authLogger.info('activate successful');
-      return res.status(200).send(user.toAuthJSON());
+      const authToken = user.toAuthJSON()
+      req.session.jwt = await authToken.token;
+      delete authToken.token;
+      return res.status(200).send(authToken);
     } catch (error) {
       authLogger.debug('activate failed', error);
       res.status(400).send({
@@ -99,5 +102,12 @@ export class AuthController implements AuthControllerType {
         status: 400
       });
     }
+  }
+
+  async logout(req: Request, res: Response) {
+    req.session.destroy((err) => {
+      if (err) return res.status(400).send('failed to logout');
+      res.status(200).send({ msg: 'logged out' });
+    });
   }
 }

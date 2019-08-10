@@ -41,8 +41,6 @@ mongoose.connect(mongoUrl, {useMongoClient: true})
     // process.exit();
   });
 
-
-
 // Express configuration
 app.use(log4js.connectLogger(log4js.getLogger('http'), { level: 'auto' }));
 app.set('port', process.env.PORT || 3000);
@@ -58,37 +56,16 @@ app.use(session({
   store: new MongoStore({
     url: mongoUrl,
     autoReconnect: true
-  })
+  }),
+  unset: 'destroy'
 }));
-app.use(lusca.xframe('SAMEORIGIN'));
+app.use(lusca.xframe('SAMEORIGIN'))
 app.use(lusca.xssProtection(true));
 app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(favicon(path.join(__dirname, '../static', 'icon.png')));
 app.use(cors());
-
-app.use(expressJwt({
-    secret: process.env.JWT_SECRET,
-    requestProperty: 'auth',
-    getToken: function fromHeader(req: express.Request) {
-      const tokenHeader = req.headers.Authorization || req.headers.authorization;
-      if (tokenHeader && (tokenHeader as string).split(' ')[0] === 'Bearer') {
-        return (tokenHeader as string).split(' ')[1];
-      }
-    }
-  })
-    .unless({path: [/\/api-docs\//g, {url: '/', method: 'OPTIONS'}, /\/auth\//g]})
-);
-
-app.use(function (err, req, res, next) {
-  if (err.name === 'UnauthorizedError') {
-    res.status(401).send({
-      msg: 'Invalid or no token supplied',
-      code: 401
-    });
-  }
-});
 
 // express routes
 const router = new RRouter();

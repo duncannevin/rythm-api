@@ -34,7 +34,7 @@ export interface UserServiceType {
    * @param {UserId} userId
    * @returns {Promise<UserMdl>}
    */
-  findByUserId(userId: UserId): Promise<UserMdl> 
+  findByUserId(userId: UserId): Promise<UserMdl>
 
   /**
    * @description Saves the user in the storage
@@ -48,7 +48,7 @@ export interface UserServiceType {
    * @param {UserMdl} user
    * @return {Promise<UserMdl>}
    */
-  updateOrCreate(user: UserMdl): Promise<UserMdl> 
+  updateOrCreate(user: UserMdl): Promise<UserMdl>
 
   /**
    * @description Removes liked

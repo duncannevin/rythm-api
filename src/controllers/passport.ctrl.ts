@@ -10,7 +10,6 @@ import { inject, autoInjectable, singleton } from 'tsyringe';
 import { UserService } from '../services/user.srvc';
 import { linkedin, github, twitter, google } from '../config/keys.conf';
 import { UserMdl } from '../models/user.mdl';
-import { activationExpiration, activationTokenGen } from '../utils/helpers.utl';
 import { authLogger } from '../utils/loggers.utl';
 import { PassportControlType } from 'passport-ctrl.type';
 
@@ -18,7 +17,7 @@ import { PassportControlType } from 'passport-ctrl.type';
 @autoInjectable()
 export class PassportControl implements PassportControlType {
   passport: PassportStatic;
-  authenticate: any; 
+  authenticate: any;
 
   constructor (
     @inject('UserServiceType') private userService?: UserService
@@ -88,12 +87,12 @@ export class PassportControl implements PassportControlType {
     try {
       const user = await this.userService.findByEmail(email);
       if (!user || !user.validatePassword(password)) {
-        return done(null, false, { error: { 'email or passord': 'is invalid' }});
+        return done(undefined, false, { error: { 'email or passord': 'is invalid' }});
       }
-      return done(null, user);
+      return done(undefined, user);
     } catch (error) {
       authLogger.debug('local auth failed', error);
-      done(error, null);
+      done(error, undefined);
     }
   }
 
@@ -118,8 +117,8 @@ export class PassportControl implements PassportControlType {
     }, this._oauth2Callback));
 
     /**
-    * @description Github oauth
-    */
+     * @description Github oauth
+     */
     passport.use(new GitHubStrategy({
         clientID: github.GITHUB_CLIENT_ID || 'CREATE-A-keys.conf.ts-FILE',
         clientSecret: github.GITHUB_CLIENT_SECRET || 'CREATE-A-keys.conf.ts-FILE',
@@ -127,8 +126,8 @@ export class PassportControl implements PassportControlType {
       }, this._oauth2Callback));
 
     /**
-    * @description Twitter oauth
-    */
+     * @description Twitter oauth
+     */
     passport.use(new TwitterStrategy({
         consumerKey: twitter.TWITTER_CLIENT_ID || 'CREATE-A-keys.conf.ts-FILE',
         consumerSecret: twitter.TWITTER_CLIENT_SECRET || 'CREATE-A-keys.conf.ts-FILE',
@@ -137,8 +136,8 @@ export class PassportControl implements PassportControlType {
       }, this._oauth1Callback));
 
     /**
-    * @description Google oauth
-    */
+     * @description Google oauth
+     */
     passport.use(new GoogleStrategy.Strategy({
       clientID: google.GOOGLE_CLIENT_ID || 'CREATE-A-keys.conf.ts-FILE',
       clientSecret: google.GOOGLE_CLIENT_SECRET || 'CREATE-A-keys.conf.ts-FILE',

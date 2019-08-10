@@ -5,10 +5,11 @@ import { UserService } from './services/user.srvc';
 
 import { TodoController } from './controllers/todo.ctrl';
 import { UserController } from './controllers/user.ctrl';
-import { AuthController } from './controllers/auth.ctrl'; 
+import { AuthController } from './controllers/auth.ctrl';
 import { RRouter } from './routes';
 import { Validators } from './utils/validators.utl';
 import { PassportControl } from './controllers/passport.ctrl';
+import { Lock } from './lock.auth';
 
 container
   .register('TodoServiceType', {
@@ -28,3 +29,4 @@ const userCtrl = container.resolve(UserController);
 const authCtrl = container.resolve(AuthController);
 const socialAuthCtrl = container.resolve(PassportControl);
 const rrouter = container.resolve(RRouter);
+const lock = container.resolve(Lock);

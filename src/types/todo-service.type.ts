@@ -69,7 +69,7 @@ export interface TodoServiceType {
    * @param {TodoId} todoId
    * @return {Promise<TodoMdl>}
    */
-  decrementThumbDown(todoId: TodoId): Promise<TodoMdl> 
+  decrementThumbDown(todoId: TodoId): Promise<TodoMdl>
 
   /**
    * @description insert comments into TodoMdl comment array

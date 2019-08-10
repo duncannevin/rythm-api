@@ -7,6 +7,7 @@ import { AuthController } from './controllers/auth.ctrl';
 import { UserController } from './controllers/user.ctrl';
 import { TodoController } from './controllers/todo.ctrl';
 import { PassportControl } from './controllers/passport.ctrl';
+import { Lock } from './lock.auth';
 
 @autoInjectable()
 export class RRouter {
@@ -19,55 +20,17 @@ export class RRouter {
     private passportController?: PassportControl,
     private authController?: AuthController,
     private userController?: UserController,
-    private todoController?: TodoController
+    private todoController?: TodoController,
+    private lock?: Lock
   ) {
-    this._lockRequired = this._lockRequired.bind(this);
-    this._lockOptional = this._lockOptional.bind(this);
-
     this._initialize();
   }
 
-  private _getToken (req: Request): string|null {
-    // @ts-ignore
-    const { header: { authorization } } = req;
-    const name = authorization.split(' ')[0]
-    if (name === 'Token' || name === 'Bearer') {
-      return authorization.split(' ')[1];
-    }
-
-    return null;
-  }
-
-  private _lockRequired (req: Request, res: Response, next: NextFunction): void {
-    try {
-      const token = this._getToken(req);
-      if (!token) throw new Error('no authorization token found');
-      const secret = process.env.SESSION_SECRET;
-      const decoded = verify(token, secret);
-      req['user'] = decoded;
-      next();
-    } catch(error) {
-      res.status(401).send({ msg: 'unauthorized', code: 401 });
-    }
-  }
-
-  private _lockOptional (req, res, next): void {
-    try {
-      const token = this._getToken(req);
-      const secret = process.env.SESSION_SECRET;
-      const decoded = verify(token, secret);
-      req.user = decoded;
-      next();
-    } catch(error) {
-      next();
-    }
-  }
-
   _initialize (): void {
-    this.authRouter.get('/test', this._lockRequired, (req, res) => {
+    this.authRouter.get('/test', this.lock.required, (req, res) => {
       res.send({ usr: req.user });
     });
-    this.authRouter.get('/test2', this._lockOptional, (req, res) => {
+    this.authRouter.get('/test2', this.lock.optional, (req, res) => {
       res.send({ usr: req.user });
     });
 
@@ -84,6 +47,7 @@ export class RRouter {
     this.authRouter.get('/twitter/callback', this.passportController.authenticate('twitter'), this.authController.activate);
     this.authRouter.get('/google', this.passportController.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login', 'https://www.googleapis.com/auth/plus.profile.emails.read'], session: false }));
     this.authRouter.get('/google/callback', this.passportController.authenticate('google'), this.authController.activate);
+    this.authRouter.put('/logout', this.authController.logout)
 
     this.userRouter.get('/', this.userController.getAll);
     this.todoRouter.get('/:userId', this.userController.getUser);

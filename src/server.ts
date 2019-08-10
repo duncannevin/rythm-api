@@ -8,13 +8,12 @@ const app = require('./app');
  * Error Handler. Provides full stack - remove for production
  */
 app.use(errorHandler());
-
 configure('./src/config/log4js.json');
 
 /**
  * Start Express server.
  */
-const server = app.listen(app.get('port'), () => {
+app.listen(app.get('port'), () => {
   const runningMsg: string = `App is running at http://localhost:${app.get('port')} in ${app.get('env')} mode`;
   startupLog.info(runningMsg);
   if (app.get('env') === 'development') {
@@ -22,5 +21,3 @@ const server = app.listen(app.get('port'), () => {
     console.log('  Press CTRL-C to stop\n');
   }
 });
-
-export = server;

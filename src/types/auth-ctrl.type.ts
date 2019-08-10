@@ -6,7 +6,7 @@ export interface AuthControllerType {
 
   usernameExistsCheck<T>(req: Request, resp: Response): Promise<T>
 
-  register<T>(req: Request, res: Response, next: NextFunction): Promise<T> 
+  register<T>(req: Request, res: Response, next: NextFunction): Promise<T>
 
-  activate<T>(req: Request, res: Response): Promise<T> 
+  activate<T>(req: Request, res: Response): Promise<T>
 }
