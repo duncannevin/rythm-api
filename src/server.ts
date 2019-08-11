@@ -26,5 +26,7 @@ const server = app.listen(app.get('port'), () => {
       module.hot.accept();
       module.hot.dispose(() => server.close());
     }
+  } else {
+    console.log('[PROD] starting production application');
   }
 });
