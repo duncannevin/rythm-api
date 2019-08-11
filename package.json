@@ -8,19 +8,12 @@
   },
   "author": "Duncan Nevin",
   "scripts": {
-    "start": "npm run build && npm run serve",
-    "build": "npm run build-ts && npm run tslint --fix && npm run kill:3000",
-    "kill:3000": "kill $( lsof -i:3000 -t )",
-    "serve": "node --inspect dist/server.js",
-    "watch-node": "nodemon --inspect dist/server.js",
-    "dev": "npm run kill:3000 && npm run watch-node && concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\"",
+    "start": "node dist/server.js",
+    "build": "webpack --config webpack.prod.js",
+    "build:dev": "webpack --config webpack.dev.js",
     "test": "jest --forceExit --coverage --verbose --runInBand",
-    "build-ts": "tsc",
-    "watch-ts": "tsc -w",
-    "tslint": "tslint -c tslint.json -p tsconfig.json",
-    "debug": "npm run build && npm run watch-debug",
-    "serve-debug": "node --inspect dist/server.js",
-    "watch-debug": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve-debug\""
+    "tslint": "tslint -c tslint.json -p tsconfig.json --fix",
+    "kill:3000": "kill $( lsof -i:3000 -t )"
   },
   "dependencies": {
     "async": "^2.6.0",
@@ -40,7 +33,7 @@
     "lodash": "^4.17.4",
     "log4js": "^3.0.5",
     "lusca": "^1.5.2",
-    "mongoose": "^4.13.19",
+    "mongoose": "^5.6.9",
     "morgan": "^1.9.0",
     "nodemailer": "^4.4.1",
     "object.omit": "^3.0.0",
@@ -85,6 +78,7 @@
     "@types/supertest": "^2.0.4",
     "@types/uniqid": "^4.1.2",
     "chai": "^4.1.2",
+    "clean-webpack-plugin": "^3.0.0",
     "concurrently": "^3.5.1",
     "jest": "^21.2.1",
     "mongodb-memory-server": "^5.1.10",
@@ -92,8 +86,13 @@
     "shelljs": "^0.7.7",
     "supertest": "^3.0.0",
     "ts-jest": "^21.2.4",
+    "ts-loader": "^6.0.4",
     "ts-node": "^4.0.2",
     "tslint": "^5.8.0",
-    "typescript": "^2.6.2"
+    "typescript": "^2.6.2",
+    "webpack": "^4.39.1",
+    "webpack-cli": "^3.3.6",
+    "webpack-merge": "^4.2.1",
+    "webpack-node-externals": "^1.7.2"
   }
 }

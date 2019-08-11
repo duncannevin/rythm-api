@@ -28,7 +28,7 @@ export class RRouter {
 
   _initialize (): void {
     this.authRouter.get('/test', this.lock.required, (req, res) => {
-      res.send({ usr: req.user });
+      res.send({ usr: req.user, yo: 'dude' });
     });
     this.authRouter.get('/test2', this.lock.optional, (req, res) => {
       res.send({ usr: req.user });

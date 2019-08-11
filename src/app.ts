@@ -11,14 +11,11 @@ import * as mongo from 'connect-mongo';
 import * as mongoose from 'mongoose';
 import * as expressValidator from 'express-validator';
 import * as bluebird from 'bluebird';
-import * as expressJwt from 'express-jwt';
 import * as swaggerUI from 'swagger-ui-express';
 import * as swaggerDocument from '../swagger.json';
 import { RRouter } from './routes';
 import * as log4js from 'log4js';
 import * as passport from 'passport';
-import * as favicon from 'serve-favicon';
-import * as path from 'path';
 import * as cors from 'cors';
 
 const MongoStore = mongo(session);
@@ -32,7 +29,7 @@ const app = express();
 // Connect to MongoDB
 const mongoUrl = process.env.MONGODB_URI;
 (<any>mongoose).Promise = bluebird;
-mongoose.connect(mongoUrl, {useMongoClient: true})
+mongoose.connect(mongoUrl)
   .then(() => { /** ready to use. The `mongoose.connect()` promise resolves to undefined. */
     console.log('MongoDB connected on ' + mongoUrl);
   })
@@ -64,7 +61,6 @@ app.use(lusca.xssProtection(true));
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use(favicon(path.join(__dirname, '../static', 'icon.png')));
 app.use(cors());
 
 // express routes
