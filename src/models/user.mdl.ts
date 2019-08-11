@@ -24,6 +24,11 @@ export interface UserMdl {
   passwordResetToken?: string;
   passwordResetExpires?: Date;
 
+  createdAt?: string;
+  updatedAt?: string;
+
+  interests?: string[];
+
   tokens?: Array<AuthTokenMdl>;
 
   profile?: ProfileMdl;

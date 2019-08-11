@@ -36,6 +36,8 @@ const UserSchema = new mongoose.Schema({
   passwordResetToken: String,
   passwordResetExpires: Date,
 
+  interests: [String],
+
   profile: {
     fname: String,
     lname: String,
@@ -43,13 +45,11 @@ const UserSchema = new mongoose.Schema({
   }
 }, {timestamps: true, versionKey: false});
 
-/**
- * Password hash middleware.
- */
 UserSchema.pre('save', function save(next) {
   const user = this;
   user.liked = user.liked || [];
   user.notLiked = user.notLiked || [];
+  user.interests = user.interests || [];
   next();
 });
 
@@ -81,6 +81,7 @@ UserSchema.methods.generateJWT = function () {
     lname: this.lname,
     email: this.email,
     id: this._id,
+    user_id: this.user_id,
     role: this.role
   });
 }

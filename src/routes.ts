@@ -49,16 +49,15 @@ export class RRouter {
     this.authRouter.get('/google/callback', this.passportController.authenticate('google'), this.authController.activate);
     this.authRouter.put('/logout', this.authController.logout)
 
-    this.userRouter.get('/', this.userController.getAll);
-    this.todoRouter.get('/:userId', this.userController.getUser);
+    this.userRouter.get('/getprofile', this.lock.required, this.userController.getUser);
 
-    this.todoRouter.post('/insert', this.todoController.insertTodo);
-    this.todoRouter.post('/insertmany', this.todoController.insertMany);
-    this.todoRouter.get('/query', this.todoController.getTodos);
-    this.todoRouter.put('/edit', this.todoController.editTodo);
-    this.todoRouter.delete('/remove', this.todoController.deleteTodo);
-    this.todoRouter.put('/thumbs', this.todoController.thumbs);
-    this.todoRouter.post('/comment', this.todoController.comment);
+    this.todoRouter.post('/insert', this.lock.required, this.todoController.insertTodo);
+    this.todoRouter.post('/insertmany', this.lock.required, this.todoController.insertMany);
+    this.todoRouter.get('/query', this.lock.required, this.todoController.getTodos);
+    this.todoRouter.put('/edit', this.lock.required, this.todoController.editTodo);
+    this.todoRouter.delete('/remove', this.lock.required, this.todoController.deleteTodo);
+    this.todoRouter.put('/thumbs', this.lock.required, this.todoController.thumbs);
+    this.todoRouter.post('/comment', this.lock.required, this.todoController.comment);
 
     this.swaggerRouter = Router();
   }
