@@ -88,6 +88,7 @@ UserSchema.methods.generateJWT = function () {
 UserSchema.methods.toAuthJSON = function () {
   return {
     _id: this._id,
+    user_id: this.user_id,
     name: this.name,
     email: this.email,
     token: this.generateJWT()
