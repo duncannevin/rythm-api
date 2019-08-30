@@ -1,12 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import * as nodemailer from 'nodemailer';
 import { inject, autoInjectable, singleton } from 'tsyringe';
-
 import { UserMdl } from '../models/user.mdl';
 import { UserService } from '../services/user.srvc';
 import { Validators } from '../utils/validators.utl';
 import { authLogger } from '../utils/loggers.utl';
-import { Email, Username } from '../types/general-types';
+import { Email, Username } from 'general-types';
 import { AuthControllerType } from 'auth-ctrl.type';
 
 @singleton()

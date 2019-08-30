@@ -4,7 +4,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
   // app entry
-  entry: [ './src/server.ts' ],
+  entry: [ './src/app.ts' ],
   // target
   target: 'node',
   // prevent ts warnings
@@ -35,6 +35,6 @@ module.exports = {
   },
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: 'server.js'
+    filename: 'app.js'
   }
-}
+};

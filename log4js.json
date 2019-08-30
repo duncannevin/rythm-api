@@ -20,10 +20,11 @@
       "type": "logLevelFilter",
       "level": "ERROR",
       "appender": "errorFile"
-    }
+    },
+    "out": { "type": "stdout" }
   },
   "categories": {
-    "default": { "appenders": [ "app", "errors" ], "level": "DEBUG" },
-    "http": { "appenders": [ "access"], "level": "DEBUG" }
+    "default": { "appenders": [ "app", "errors", "out" ], "level": "info" },
+    "http": { "appenders": [ "access"], "level": "info" }
   }
 }

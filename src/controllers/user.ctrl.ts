@@ -12,6 +12,7 @@ export class UserController {
     @inject('UserServiceType') private userService?: UserService
   ) {
     this.getUser = this.getUser.bind(this);
+    this.getAll = this.getAll.bind(this);
   }
 
   async getAll(req: Request, resp: Response) {

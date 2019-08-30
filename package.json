@@ -8,8 +8,8 @@
   },
   "author": "Duncan Nevin",
   "scripts": {
-    "start": "NODE_ENV=production node dist/server.js",
-    "start:dev": "NODE_ENV=development node dist/server.js",
+    "start": "NODE_ENV=production node dist/app.js",
+    "start:dev": "NODE_ENV=development node dist/app.js",
     "build": "webpack --config webpack.prod.js",
     "build:dev": "webpack --config webpack.dev.js",
     "test": "jest --forceExit --coverage --verbose --runInBand",
@@ -17,10 +17,12 @@
     "kill:3000": "kill $( lsof -i:3000 -t )"
   },
   "dependencies": {
+    "@types/socket.io": "^2.1.2",
     "async": "^2.6.0",
     "bcrypt-nodejs": "0.0.3",
     "bluebird": "^3.5.1",
     "body-parser": "^1.18.2",
+    "chalk": "^2.4.2",
     "compression": "^1.7.1",
     "connect-mongo": "^2.0.0",
     "cors": "^2.8.4",
@@ -48,6 +50,7 @@
     "reflect-metadata": "^0.1.13",
     "request": "^2.83.0",
     "serve-favicon": "^2.5.0",
+    "socket.io": "^2.2.0",
     "swagger-ui-express": "^3.0.8",
     "tsyringe": "^3.3.0",
     "uniqid": "^5.0.3"

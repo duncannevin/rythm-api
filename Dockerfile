@@ -10,9 +10,8 @@ COPY package-lock.json .
 RUN npm install
 
 # Bundle app source
-COPY . . 
+COPY . .
 RUN npm run build
-RUN npm run kill:3000
 
 ## RUN
 CMD [ "npm", "start" ]
