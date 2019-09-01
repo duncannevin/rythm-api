@@ -84,17 +84,23 @@ UserSchema.methods.generateJWT = function () {
     user_id: this.user_id,
     role: this.role
   });
-}
+};
 
 UserSchema.methods.toAuthJSON = function () {
   return {
     _id: this._id,
-    user_id: this.user_id,
-    name: this.name,
     email: this.email,
+    role: this.role,
+    username: this.username,
+    createdAt: this.createdAt,
+    updatedAt: this.updatedAt,
+    user_id: this.user_id,
+    liked: this.liked,
+    notLiked: this.notLiked,
+    interests: this.interests,
     token: this.generateJWT()
   }
-}
+};
 
 type UserType = UserMdl & mongoose.Document;
 const UserRepository = mongoose.model<UserType>('UserMdl', UserSchema);

@@ -1,5 +1,5 @@
 import { getLogger } from 'log4js';
-import * as chalk from 'chalk';
+const chalk = require('chalk');
 
 export const todoLogger = getLogger('[TODO]');
 export const userLogger = getLogger('[USER]');

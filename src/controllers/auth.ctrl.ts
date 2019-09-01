@@ -89,7 +89,7 @@ export class AuthController implements AuthControllerType {
     try {
       const user = req.user;
       authLogger.info('activate successful');
-      const authToken = user.toAuthJSON()
+      const authToken = user.toAuthJSON();
       req.session.jwt = await authToken.token;
       delete authToken.token;
       return res.status(200).send(authToken);
