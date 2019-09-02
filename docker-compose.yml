@@ -1,6 +1,7 @@
 version: '3.5'
 services:
   app:
+    container_name: rythm_api
     build: .
     volumes: 
       - '/app/node_modules'
@@ -9,3 +10,12 @@ services:
       - '3000:3000'
     environment:
       - NODE_ENV=production
+    links:
+      - mongo
+  mongo:
+    container_name: mongo
+    image: mongo
+    volumes: 
+      - /data:/data/db
+    ports:
+      - "27017:27017"

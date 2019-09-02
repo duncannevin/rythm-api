@@ -34,20 +34,17 @@ const app = express();
 // Connect to MongoDB
 const mongoUrl = compileMongoUrl();
 
-app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
-  (<any>mongoose).Promise = bluebird;
-  mongoose.set('useNewUrlParser', true);
-  mongoose.set('useCreateIndex', true);
-  mongoose.connect(mongoUrl)
-    .then(() => { /** ready to use. The `mongoose.connect()` promise resolves to undefined. */
-      mongoLogger.info('connected');
-      next();
-    })
-    .catch(err => {
-      mongoLogger.error('connection error. Please make sure MongoDB is running. ' + err);
-      process.exit();
-    });
-});
+(<any>mongoose).Promise = bluebird;
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useCreateIndex', true);
+mongoose.connect(mongoUrl)
+  .then(() => { /** ready to use. The `mongoose.connect()` promise resolves to undefined. */
+    mongoLogger.info('connected');
+  })
+  .catch(err => {
+    mongoLogger.error('connection error. Please make sure MongoDB is running. ' + err);
+    shutdown();
+  });
 
 // Express configuration
 app.use(log4js.connectLogger(log4js.getLogger('http'), { level: 'auto' }));
@@ -126,6 +123,7 @@ function startup () {
 
 function shutdown () {
   shutdownLogger.info('Received kill signal, shutting down gracefully');
+
   server.close(() => {
     shutdownLogger.info('Closed out remaining connections');
     process.exit(0);
