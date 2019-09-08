@@ -78,6 +78,11 @@ app.on('connection', connection => {
 
 app.use(cors());
 
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+  next();
+});
+
 // express routes
 const router = new RRouter();
 app.use('/auth', router.authRouter);

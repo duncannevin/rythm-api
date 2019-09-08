@@ -33,6 +33,8 @@ export class PassportControl implements PassportControlType {
   }
 
   private _passportInit (): void {
+    const userService = this.userService;
+
     passport.serializeUser(function(user, done) {
       // @ts-ignore
       done(undefined, user.id);
@@ -41,7 +43,7 @@ export class PassportControl implements PassportControlType {
     passport.deserializeUser(async function(id, done) {
       try {
         // @ts-ignore
-        const user: UserMdl = await this.userService.findById(id);
+        const user: UserMdl = await userService.findById(id);
         done(undefined, user);
       } catch (error) {
         done(error, undefined);
