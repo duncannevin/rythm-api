@@ -8,7 +8,6 @@ import * as LocalStrategy from 'passport-local';
 import { inject, autoInjectable, singleton } from 'tsyringe';
 
 import { UserService } from '../services/user.srvc';
-import { linkedin, github, twitter, google } from '../config/keys.conf';
 import { UserMdl } from '../models/user.mdl';
 import { authLogger } from '../utils/loggers.utl';
 import { PassportControlType } from 'passport-ctrl.type';
@@ -97,8 +96,16 @@ export class PassportControl implements PassportControlType {
       done(error, undefined);
     }
   }
+  
 
   private _initialize(): void {
+    this._initLocal();
+
+    this.passport = passport;
+    this.authenticate = this.passport.authenticate.bind(passport);
+  }
+
+  private _initLocal() {
     /**
      * @description Local auth
      */
@@ -106,48 +113,53 @@ export class PassportControl implements PassportControlType {
       usernameField: 'email',
       passwordField: 'password'
     }, this._localAuthCallback));
+  }
 
+  private _initLinkedIn() {
     /**
      * @description Linkedin oauth
      */
     passport.use(new LinkedInStrategy.Strategy({
-      clientID: linkedin.CLIENT_ID,
-      clientSecret: linkedin.CLIENT_SECRET,
+      clientID: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
       callbackURL: 'http://localhost:3000/auth/linkedin/callback',
       scope: ['r_emailaddress', 'r_basicprofile'],
       state: true
     }, this._oauth2Callback));
+  }
 
+  private _initGithub() {
     /**
      * @description Github oauth
      */
     passport.use(new GitHubStrategy({
-        clientID: github.CLIENT_ID,
-        clientSecret: github.CLIENT_SECRET,
+        clientID: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
         callbackURL: 'http://localhost:3000/auth/github/callback'
       }, this._oauth2Callback));
+  }
 
+  private _initTwitter() {
     /**
      * @description Twitter oauth
      */
     passport.use(new TwitterStrategy({
-        consumerKey: twitter.CLIENT_ID,
-        consumerSecret: twitter.CLIENT_SECRET,
+        consumerKey: process.env.CLIENT_ID,
+        consumerSecret: process.env.CLIENT_SECRET,
         callbackURL: 'http://localhost:3000/auth/twitter/callback',
         userProfileURL  : 'https://api.twitter.com/1.1/account/verify_credentials.json?include_email=true',
       }, this._oauth1Callback));
+  }
 
+  private _initGoogle() {
     /**
      * @description Google oauth
      */
     passport.use(new GoogleStrategy.Strategy({
-      clientID: google.CLIENT_ID,
-      clientSecret: google.CLIENT_SECRET,
+      clientID: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
       callbackURL: 'http://localhost:3000/auth/google/callback',
       passReqToCallback: true
     }, this._oauth2Callback));
-
-    this.passport = passport;
-    this.authenticate = this.passport.authenticate.bind(passport);
   }
 }

@@ -144,9 +144,5 @@ function shutdown () {
 }
 
 function compileMongoUrl (): string {
-  const USER = process.env.MONGODB_USER;
-  const PASS = process.env.MONGODB_PASS;
   return process.env.MONGODB_URI
-    .replace('<user>', USER)
-    .replace('<password>', PASS);
 }
