@@ -111,8 +111,8 @@ export class PassportControl implements PassportControlType {
      * @description Linkedin oauth
      */
     passport.use(new LinkedInStrategy.Strategy({
-      clientID: linkedin.LINKEDIN_CLIENT_ID || 'CREATE-A-keys.conf.ts-FILE',
-      clientSecret: linkedin.LINKEDIN_CLIENT_SECRET || 'CREATE-A-keys.conf.ts-FILE',
+      clientID: linkedin.CLIENT_ID,
+      clientSecret: linkedin.CLIENT_SECRET,
       callbackURL: 'http://localhost:3000/auth/linkedin/callback',
       scope: ['r_emailaddress', 'r_basicprofile'],
       state: true
@@ -122,8 +122,8 @@ export class PassportControl implements PassportControlType {
      * @description Github oauth
      */
     passport.use(new GitHubStrategy({
-        clientID: github.GITHUB_CLIENT_ID || 'CREATE-A-keys.conf.ts-FILE',
-        clientSecret: github.GITHUB_CLIENT_SECRET || 'CREATE-A-keys.conf.ts-FILE',
+        clientID: github.CLIENT_ID,
+        clientSecret: github.CLIENT_SECRET,
         callbackURL: 'http://localhost:3000/auth/github/callback'
       }, this._oauth2Callback));
 
@@ -131,8 +131,8 @@ export class PassportControl implements PassportControlType {
      * @description Twitter oauth
      */
     passport.use(new TwitterStrategy({
-        consumerKey: twitter.TWITTER_CLIENT_ID || 'CREATE-A-keys.conf.ts-FILE',
-        consumerSecret: twitter.TWITTER_CLIENT_SECRET || 'CREATE-A-keys.conf.ts-FILE',
+        consumerKey: twitter.CLIENT_ID,
+        consumerSecret: twitter.CLIENT_SECRET,
         callbackURL: 'http://localhost:3000/auth/twitter/callback',
         userProfileURL  : 'https://api.twitter.com/1.1/account/verify_credentials.json?include_email=true',
       }, this._oauth1Callback));
@@ -141,8 +141,8 @@ export class PassportControl implements PassportControlType {
      * @description Google oauth
      */
     passport.use(new GoogleStrategy.Strategy({
-      clientID: google.GOOGLE_CLIENT_ID || 'CREATE-A-keys.conf.ts-FILE',
-      clientSecret: google.GOOGLE_CLIENT_SECRET || 'CREATE-A-keys.conf.ts-FILE',
+      clientID: google.CLIENT_ID,
+      clientSecret: google.CLIENT_SECRET,
       callbackURL: 'http://localhost:3000/auth/google/callback',
       passReqToCallback: true
     }, this._oauth2Callback));

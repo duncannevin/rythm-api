@@ -30,13 +30,22 @@ const UserSchema = new mongoose.Schema({
 
   active: Boolean,
 
-  liked: [String],
-  notLiked: [String],
+  liked: {
+    type: Array,
+    default: String
+  },
+  notLiked: {
+    type: Array,
+    default: String
+  },
 
   passwordResetToken: String,
   passwordResetExpires: Date,
 
-  interests: [String],
+  interests: {
+    type: Array,
+    default: String
+  },
 
   profile: {
     fname: String,
