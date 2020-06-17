@@ -1,9 +1,8 @@
-import { AuthTokenMdl } from './auth-token.mdl';
-import { ProfileMdl } from './profile.mdl';
-import { TodoId } from '../types/general-types';
+import { AuthTokenMdl } from "./auth-token.mdl";
+import { ProfileMdl } from "./profile.mdl";
+import { TodoId } from "../types/general-types";
 
 export interface UserMdl {
-
   _id?: string;
   email?: string;
   username?: string;
@@ -30,6 +29,8 @@ export interface UserMdl {
   interests?: string[];
 
   tokens?: Array<AuthTokenMdl>;
+
+  image?: { data: string; contentType: string };
 
   profile?: ProfileMdl;
 

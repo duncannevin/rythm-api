@@ -1,10 +1,10 @@
-version: '3.5'
+version: "3.5"
 services:
   app:
     container_name: rythm_api
     build: .
     ports:
-      - '3000:3000'
+      - "3000:3000"
     environment:
       - NODE_ENV=production
       - MONGODB_URI=mongodb://mongo:27017/rythm_api
@@ -19,12 +19,12 @@ services:
       - GOOGLE_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
     links:
       - mongo
-    depends_on: 
+    depends_on:
       - mongo
   mongo:
     container_name: mongo
     image: mongo
-    volumes: 
+    volumes:
       - /data/rythm_api-data:/data/db
     ports:
       - "27017:27017"
