@@ -169,7 +169,7 @@ function makeHash(password, salt) {
 
 function generateIdenticon(username) {
   return {
-    data: toSvg(username, 100),
+    data: toSvg(username, 24),
     contentType: "img/svg+xml",
   };
 }
