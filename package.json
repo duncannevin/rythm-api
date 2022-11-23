@@ -51,7 +51,7 @@
     "reflect-metadata": "^0.1.13",
     "request": "^2.83.0",
     "serve-favicon": "^2.5.0",
-    "socket.io": "^2.2.0",
+    "socket.io": "^2.5.0",
     "swagger-ui-express": "^3.0.8",
     "tsyringe": "^3.3.0",
     "uniqid": "^5.0.3"
