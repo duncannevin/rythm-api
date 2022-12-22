@@ -33,7 +33,7 @@
     "express-session": "^1.15.6",
     "express-validator": "^4.3.0",
     "jdenticon": "^2.2.0",
-    "jsonwebtoken": "^8.1.1",
+    "jsonwebtoken": "^9.0.0",
     "lodash": "^4.17.4",
     "log4js": "^3.0.5",
     "lusca": "^1.5.2",
